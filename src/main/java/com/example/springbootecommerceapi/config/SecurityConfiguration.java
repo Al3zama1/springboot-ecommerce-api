@@ -39,7 +39,7 @@ public class SecurityConfiguration {
                 .ignoringAntMatchers("/h2-console/**")
                 .and()
                 .authorizeRequests()
-                .antMatchers("/api/ecommerce/v1/authentication/**", "/h2-console/**").permitAll()
+                .antMatchers("/api/ecommerce/v1/register/**", "/h2-console/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/ecommerce/v1/products/**").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/ecommerce/v1/products").hasAnyRole("EMPLOYEE", "ADMIN")
                 .antMatchers(HttpMethod.PUT, "/api/ecommerce/v1/products/{\\d+}").hasAnyRole("EMPLOYEE, ADMIN")
@@ -70,7 +70,6 @@ public class SecurityConfiguration {
                 .firstName("employee")
                 .lastName("Last")
                 .gender(Gender.MALE)
-                .role(Role.EMPLOYEE)
                 .phone("(323) 456-1234")
                 .email("employee@gmail.com")
                 .password(passwordEncoder.encode("12345678"))
@@ -79,25 +78,26 @@ public class SecurityConfiguration {
                 .state("California")
                 .zipCode("90002")
                 .build();
-        UserEntity customer1 = new UserBuilder()
+        employee.setActive(true);
+        employee.setRole(Role.EMPLOYEE);
+        UserEntity customer = new UserBuilder()
                 .firstName("customer1")
                 .lastName("Last")
                 .gender(Gender.MALE)
-                .role(Role.CUSTOMER)
                 .phone("(323) 456-1234")
-                .email("customer1@gmail.com")
+                .email("customer@gmail.com")
                 .password(passwordEncoder.encode("12345678"))
                 .street("5678 S 88Th St")
                 .city("Los Angeles")
                 .state("California")
                 .zipCode("90002")
                 .build();
-        customer1.setActive(true);
-        UserEntity customer2 = new UserBuilder()
+        customer.setActive(true);
+        customer.setRole(Role.CUSTOMER);
+        UserEntity admin = new UserBuilder()
                 .firstName("customer2")
                 .lastName("Last")
                 .gender(Gender.MALE)
-                .role(Role.CUSTOMER)
                 .phone("(323) 456-1234")
                 .email("customer2@gmail.com")
                 .password(passwordEncoder.encode("12345678"))
@@ -106,8 +106,10 @@ public class SecurityConfiguration {
                 .state("California")
                 .zipCode("90002")
                 .build();
+        admin.setActive(true);
+        admin.setRole(Role.CUSTOMER);
         return  args -> {
-            userRepository.saveAll(List.of(customer1, customer2, employee));
+            userRepository.saveAll(List.of(customer, admin, employee));
         };
     }
 

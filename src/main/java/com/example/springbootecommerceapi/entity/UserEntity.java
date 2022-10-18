@@ -17,7 +17,6 @@ import java.util.Objects;
         name = "userEntity"
 )
 public class UserEntity {
-
     @Id
     @Column(
             name = "userNumber"
@@ -44,8 +43,8 @@ public class UserEntity {
             nullable = false
     )
     private String lastName;
+
     @Enumerated(EnumType.STRING)
-    @NotNull
     @Column(
             nullable = false
     )
@@ -101,7 +100,7 @@ public class UserEntity {
     public UserEntity() {
     }
 
-    public UserEntity(Long userNumber, String firstName, String lastName, Role role, Gender gender, String phone, String email, String password, String street, String city, String state, String zipCode, boolean active) {
+    public UserEntity(Long userNumber, String firstName, String lastName, Role role, Gender gender, String phone, String email, String password, String street, String city, String state, String zipCode) {
         this.userNumber = userNumber;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -114,8 +113,8 @@ public class UserEntity {
         this.city = city;
         this.state = state;
         this.zipCode = zipCode;
-        this.active = active;
     }
+
 
 
     public Long getUserNumber() {
@@ -146,7 +145,7 @@ public class UserEntity {
         return role;
     }
 
-    public void setRole(String roles) {
+    public void setRole(Role role) {
         this.role = role;
     }
 

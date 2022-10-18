@@ -2,8 +2,8 @@ package com.example.springbootecommerceapi.model;
 
 import com.example.springbootecommerceapi.entity.UserEntity;
 
-public class UserBuilder {
 
+public class UserBuilder {
     private Long userNumber;
     private String firstName;
     private String lastName;
@@ -32,10 +32,6 @@ public class UserBuilder {
         return this;
     }
 
-    public UserBuilder role(Role role) {
-        this.role = role;
-        return this;
-    }
 
     public UserBuilder gender(Gender gender) {
         this.gender = gender;
@@ -78,6 +74,6 @@ public class UserBuilder {
     }
 
     public UserEntity build() {
-        return new UserEntity(userNumber, firstName, lastName, role, gender, phone, email, password, street, city, state, zipCode, false);
+        return new UserEntity(userNumber, firstName, lastName, role, gender, phone, email, password, street, city, state, zipCode);
     }
 }

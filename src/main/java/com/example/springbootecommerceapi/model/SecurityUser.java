@@ -18,12 +18,17 @@ public class SecurityUser implements UserDetails {
         this.user = user;
     }
 
+    public UserEntity getUser() {
+        return user;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(
                 new SimpleGrantedAuthority("ROLE_" + user.getRole())
         );
     }
+
 
     @Override
     public String getPassword() {
@@ -52,6 +57,6 @@ public class SecurityUser implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return this.user.isActive();
     }
 }
