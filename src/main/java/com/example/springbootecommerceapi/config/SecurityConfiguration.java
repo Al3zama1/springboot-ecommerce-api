@@ -39,7 +39,7 @@ public class SecurityConfiguration {
                 .ignoringAntMatchers("/h2-console/**")
                 .and()
                 .authorizeRequests()
-                .antMatchers("/api/ecommerce/v1/register/**", "/h2-console/**").permitAll()
+                .antMatchers("/api/ecommerce/v1/authentication/**", "/h2-console/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/ecommerce/v1/products/**").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/ecommerce/v1/products").hasAnyRole("EMPLOYEE", "ADMIN")
                 .antMatchers(HttpMethod.PUT, "/api/ecommerce/v1/products/{\\d+}").hasAnyRole("EMPLOYEE, ADMIN")

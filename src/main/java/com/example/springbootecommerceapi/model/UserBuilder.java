@@ -7,7 +7,6 @@ public class UserBuilder {
     private Long userNumber;
     private String firstName;
     private String lastName;
-    private Role role;
     private Gender gender;
     private String phone;
     private String email;
@@ -74,6 +73,6 @@ public class UserBuilder {
     }
 
     public UserEntity build() {
-        return new UserEntity(userNumber, firstName, lastName, role, gender, phone, email, password, street, city, state, zipCode);
+        return new UserEntity(userNumber, firstName, lastName, gender, phone, email, password, street, city, state, zipCode);
     }
 }

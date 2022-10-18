@@ -17,11 +17,14 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.UUID;
+
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = {AuthenticationController.class})
@@ -39,7 +42,7 @@ class AuthenticationControllerTest {
 
     @Test
     void registerCustomer_whenValidData_return201() throws Exception {
-        // given
+        // GIVEN
         UserEntity customer = new UserBuilder()
                 .firstName("John")
                 .lastName("Last")
@@ -53,8 +56,8 @@ class AuthenticationControllerTest {
                 .zipCode("90002")
                 .build();
 
-        // when
-        mockMvc.perform(post("/api/ecommerce/v1/register/customer")
+        // WHEN
+        mockMvc.perform(post("/api/ecommerce/v1/authentication/register-customer")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(customer))
                 .accept(MediaType.APPLICATION_JSON)
@@ -69,7 +72,7 @@ class AuthenticationControllerTest {
 
     @Test
     void registerCustomer_whenInvalidData_return422() throws Exception {
-        // given
+        // GIVEN
         UserEntity customer = new UserBuilder()
                 .firstName("John")
                 .lastName("Last")
@@ -83,17 +86,45 @@ class AuthenticationControllerTest {
                 .zipCode("90002")
                 .build();
 
-        // when
-        mockMvc.perform(post("/api/ecommerce/v1/register/customer")
+        // WHEN
+        mockMvc.perform(post("/api/ecommerce/v1/authentication/register-customer")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(customer))
                 .accept(MediaType.APPLICATION_JSON)
                 .with(csrf())
         ).andExpect(status().isUnprocessableEntity());
 
-        // then
+        // THEN
         then(authenticationService).should(never()).registerCustomer(any());
 
+    }
+
+    @Test
+    void activateAccount_whenTokenProvided_return200() throws Exception {
+        // GIVEN
+        String token = UUID.randomUUID().toString();
+
+        // WHEN
+        mockMvc.perform(get("/api/ecommerce/v1/authentication/activate-account")
+                .with(csrf())
+                .param("token", token))
+                .andExpect(status().isOk());
+
+        // THEN
+        then(authenticationService).should().activateAccount(token);
+    }
+
+    @Test
+    void activateAccount_whenTokenNotProvided_return400() throws Exception {
+        // GIVEN
+
+        // WHEN
+        mockMvc.perform(get("/api/ecommerce/v1/authentication/activate-account")
+                        .with(csrf()))
+                .andExpect(status().isBadRequest());
+
+        // THEN
+        then(authenticationService).should(never()).activateAccount(anyString());
     }
 
 }

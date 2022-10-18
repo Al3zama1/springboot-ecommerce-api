@@ -100,11 +100,10 @@ public class UserEntity {
     public UserEntity() {
     }
 
-    public UserEntity(Long userNumber, String firstName, String lastName, Role role, Gender gender, String phone, String email, String password, String street, String city, String state, String zipCode) {
+    public UserEntity(Long userNumber, String firstName, String lastName, Gender gender, String phone, String email, String password, String street, String city, String state, String zipCode) {
         this.userNumber = userNumber;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.role = role;
         this.gender = gender;
         this.phone = phone;
         this.email = email;
@@ -113,6 +112,7 @@ public class UserEntity {
         this.city = city;
         this.state = state;
         this.zipCode = zipCode;
+        this.active = false;
     }
 
 

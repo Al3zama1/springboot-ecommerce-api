@@ -15,7 +15,7 @@ import javax.validation.Valid;
 
 
 @RestController
-@RequestMapping("api/ecommerce/v1/register")
+@RequestMapping("api/ecommerce/v1/authentication")
 @Validated
 public class AuthenticationController {
 
@@ -26,16 +26,18 @@ public class AuthenticationController {
         this.authenticationService = authenticationService;
     }
 
-    @GetMapping("")
-    public String lol() {
-        return "why is this happening";
-    }
-
-    @PostMapping("/customer")
+    @PostMapping("/register-customer")
     public ResponseEntity<Void> registerCustomer(@Valid @RequestBody UserEntity user) {
         authenticationService.registerCustomer(user);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @GetMapping("/activate-account")
+    public ResponseEntity<Void> activateAccount(@RequestParam String token) {
+        authenticationService.activateAccount(token);
+
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
 

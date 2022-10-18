@@ -39,7 +39,22 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.unprocessableEntity().body(errorResponse);
     }
 
+    @ExceptionHandler(AccountActivationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<Object> handleAccountActivationException(
+            AccountActivationException exception,
+            WebRequest request
+    ) {
+        return buildErrorResponse(
+                exception,
+                exception.getMessage(),
+                HttpStatus.BAD_REQUEST,
+                request
+        );
+    }
 
+
+    @ExceptionHandler(UserException.class)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ResponseEntity<Object> handleUserException(
             UserException exception,
