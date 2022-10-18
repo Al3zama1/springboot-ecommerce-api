@@ -21,6 +21,18 @@ spring:
     resources:
       add-mappings: false
 
+  mail:
+    host: smtp.mailtrap.io
+    port: 2525
+    username: ${mailtrapuser}
+    password: ${mailtrappassword}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 server:
   error:
     include-exception: false

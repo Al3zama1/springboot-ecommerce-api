@@ -16,7 +16,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.ApplicationEventPublisher;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.Currency;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -35,8 +38,13 @@ class AuthenticationServiceTest {
     private UserRepository userRepository;
     @Mock
     private ActivationTokenRepository activationTokenRepository;
+    @Mock
+    HttpServletRequest request;
+    @Mock
+    ApplicationEventPublisher publisher;
     @InjectMocks
     private AuthenticationService authenticationService;
+
 
     @Test
     void registerCustomer_whenEmailDoesNotExist() {
@@ -55,14 +63,17 @@ class AuthenticationServiceTest {
                 .build();
         customer.setRole(Role.CUSTOMER);
 
+
         // assume token with given email does not exist
         given(userRepository.existsByEmail(customer.getEmail())).willReturn(false);
+
 
         // WHEN
         authenticationService.registerCustomer(customer);
 
         // THEN
         then(userRepository).should().save(customer);
+        then(activationTokenRepository).should().save(any(ActivationTokenEntity.class));
 
     }
 
