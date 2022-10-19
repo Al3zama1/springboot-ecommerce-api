@@ -17,13 +17,13 @@ public class ActivationTokenEntity {
             name = "tokenNumber"
     )
     @SequenceGenerator(
-            name = "tokenSequence",
-            sequenceName = "tokenSequence",
+            name = "activationTokenSequence",
+            sequenceName = "activationTokenSequence",
             allocationSize = 1
     )
     @GeneratedValue(
             strategy = GenerationType.SEQUENCE,
-            generator = "tokenSequence"
+            generator = "activationTokenSequence"
     )
     private Long tokenNumber;
     @OneToOne

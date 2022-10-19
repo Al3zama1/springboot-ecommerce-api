@@ -2,10 +2,7 @@ package com.example.springbootecommerceapi.controller;
 
 import com.example.springbootecommerceapi.config.SecurityConfiguration;
 import com.example.springbootecommerceapi.entity.UserEntity;
-import com.example.springbootecommerceapi.model.ChangeKnownPasswordDTO;
-import com.example.springbootecommerceapi.model.Gender;
-import com.example.springbootecommerceapi.model.Role;
-import com.example.springbootecommerceapi.model.UserBuilder;
+import com.example.springbootecommerceapi.model.*;
 import com.example.springbootecommerceapi.repository.UserRepository;
 import com.example.springbootecommerceapi.service.AuthenticationService;
 import com.example.springbootecommerceapi.service.JpaUserDetailsService;
@@ -166,12 +163,12 @@ class AuthenticationControllerTest {
     @Test
     void generatePasswordToken_whenValidEmailFormat_return201() throws Exception {
         // GIVEN
-        String email = "john.last@gmail.com";
+        EmailDTO email = new EmailDTO("john.last@gmail.com");
 
         mockMvc.perform(post("/api/ecommerce/v1/authentication/password-token")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(email))
+                .content(objectMapper.writeValueAsString(email)))
                 .andExpect(status().isCreated());
 
         // THEN
@@ -181,16 +178,16 @@ class AuthenticationControllerTest {
     @Test
     void generatePasswordToken_whenInvalidEmailFormat_return422() throws Exception {
         // GIVEN
-        String email = "john.lastgmail.com";
+        EmailDTO email = new EmailDTO("john.lastgmail.com");
 
         mockMvc.perform(post("/api/ecommerce/v1/authentication/password-token")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(email))
+                        .content(objectMapper.writeValueAsString(email)))
                 .andExpect(status().isUnprocessableEntity());
 
         // THEN
-        then(authenticationService).should(never()).generatePasswordToken(anyString());
+        then(authenticationService).should(never()).generatePasswordToken(any());
     }
 
 

@@ -3,6 +3,7 @@ package com.example.springbootecommerceapi.controller;
 
 import com.example.springbootecommerceapi.entity.UserEntity;
 import com.example.springbootecommerceapi.model.ChangeKnownPasswordDTO;
+import com.example.springbootecommerceapi.model.EmailDTO;
 import com.example.springbootecommerceapi.model.SecurityUser;
 import com.example.springbootecommerceapi.service.AuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,9 +52,9 @@ public class AuthenticationController {
     }
 
     @PostMapping("/password-token")
-    public ResponseEntity<Void> generatePasswordToken(@Email @RequestBody String email) {
+    public ResponseEntity<Void> generatePasswordToken(@Valid @RequestBody EmailDTO emailDTO) {
 
-        authenticationService.generatePasswordToken(email);
+        authenticationService.generatePasswordToken(emailDTO);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
 

@@ -2,14 +2,17 @@ package com.example.springbootecommerceapi.service;
 
 
 import com.example.springbootecommerceapi.entity.ActivationTokenEntity;
+import com.example.springbootecommerceapi.entity.PasswordTokenEntity;
 import com.example.springbootecommerceapi.entity.UserEntity;
 import com.example.springbootecommerceapi.event.UserRegistrationEvent;
 import com.example.springbootecommerceapi.exception.AccountActivationException;
 import com.example.springbootecommerceapi.exception.PasswordException;
 import com.example.springbootecommerceapi.exception.UserException;
 import com.example.springbootecommerceapi.model.ChangeKnownPasswordDTO;
+import com.example.springbootecommerceapi.model.EmailDTO;
 import com.example.springbootecommerceapi.model.Role;
 import com.example.springbootecommerceapi.repository.ActivationTokenRepository;
+import com.example.springbootecommerceapi.repository.PasswordTokenRepository;
 import com.example.springbootecommerceapi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -28,6 +31,7 @@ public class AuthenticationService {
     private final ActivationTokenRepository activationTokenRepository;
     private final HttpServletRequest request;
     private final PasswordEncoder passwordEncoder;
+    private final PasswordTokenRepository passwordTokenRepository;
 
     @Autowired
     public AuthenticationService(
@@ -35,13 +39,15 @@ public class AuthenticationService {
             ActivationTokenRepository activationTokenRepository,
             ApplicationEventPublisher publisher,
             HttpServletRequest request,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            PasswordTokenRepository passwordTokenRepository
     ) {
         this.userRepository = userRepository;
         this.activationTokenRepository = activationTokenRepository;
         this.publisher = publisher;
         this.request = request;
         this.passwordEncoder = passwordEncoder;
+        this.passwordTokenRepository = passwordTokenRepository;
     }
 
 
@@ -118,6 +124,17 @@ public class AuthenticationService {
         userRepository.save(user.get());
     }
 
-    public void generatePasswordToken(String email) {
+    public void generatePasswordToken(EmailDTO emailDTO) {
+        // make sure email is associated with a user
+        Optional<UserEntity> user = userRepository.findByEmail(emailDTO.getEmail());
+
+        if (user.isEmpty()) {
+            throw new UserException("User not found");
+        }
+
+        String token = UUID.randomUUID().toString();
+        PasswordTokenEntity passwordToken = new PasswordTokenEntity(user.get(), token);
+
+        passwordTokenRepository.save(passwordToken);
     }
 }

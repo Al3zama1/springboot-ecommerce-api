@@ -1,15 +1,14 @@
 package com.example.springbootecommerceapi.service;
 
 import com.example.springbootecommerceapi.entity.ActivationTokenEntity;
+import com.example.springbootecommerceapi.entity.PasswordTokenEntity;
 import com.example.springbootecommerceapi.entity.UserEntity;
 import com.example.springbootecommerceapi.exception.AccountActivationException;
 import com.example.springbootecommerceapi.exception.PasswordException;
 import com.example.springbootecommerceapi.exception.UserException;
-import com.example.springbootecommerceapi.model.ChangeKnownPasswordDTO;
-import com.example.springbootecommerceapi.model.Gender;
-import com.example.springbootecommerceapi.model.Role;
-import com.example.springbootecommerceapi.model.UserBuilder;
+import com.example.springbootecommerceapi.model.*;
 import com.example.springbootecommerceapi.repository.ActivationTokenRepository;
+import com.example.springbootecommerceapi.repository.PasswordTokenRepository;
 import com.example.springbootecommerceapi.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,11 +39,14 @@ class AuthenticationServiceTest {
     @Mock
     private ActivationTokenRepository activationTokenRepository;
     @Mock
-    HttpServletRequest request;
+    private HttpServletRequest request;
     @Mock
-    ApplicationEventPublisher publisher;
+    private ApplicationEventPublisher publisher;
     @Mock
-    PasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;
+    @Mock
+    private PasswordTokenRepository passwordTokenRepository;
+
     @InjectMocks
     private AuthenticationService authenticationService;
 
@@ -244,5 +246,60 @@ class AuthenticationServiceTest {
         then(userRepository).should(never()).save(any());
 
     }
+
+    @Test
+    void generatePasswordToken_whenEmailExists_generateToken() {
+        // GIVEN
+        UserEntity user = new UserBuilder()
+                .firstName("John")
+                .lastName("Last")
+                .gender(Gender.MALE)
+                .phone("(323) 456-1234")
+                .email("john.last@gmail.com")
+                .password("12345678")
+                .street("5678 S 88Th St")
+                .city("Los Angeles")
+                .state("California")
+                .zipCode("90002")
+                .build();
+        user.setRole(Role.CUSTOMER);
+        user.setUserNumber(1L);
+        user.setActive(true);
+        String token = UUID.randomUUID().toString();
+        EmailDTO email = new EmailDTO(user.getEmail());
+
+        PasswordTokenEntity passwordToken = new PasswordTokenEntity(user, token);
+
+        // assume user with email exists
+        given(userRepository.findByEmail(user.getEmail())).willReturn(Optional.of(user));
+
+        // WHEN
+        authenticationService.generatePasswordToken(email);
+
+
+        // THEN
+        ArgumentCaptor<PasswordTokenEntity> passwordCaptor = ArgumentCaptor.forClass(PasswordTokenEntity.class);
+        then(passwordTokenRepository).should().save(passwordCaptor.capture());
+        UserEntity capturedUser = passwordCaptor.getValue().getUserEntity();
+        assertThat(capturedUser).isEqualTo(user);
+    }
+
+    @Test
+    void generatePasswordToken_whenEmailDoesNotExist_throwUserException() {
+        // GIVEN
+        EmailDTO email = new EmailDTO("john.last@gmail.com");
+
+        given(userRepository.findByEmail(email.getEmail())).willReturn(Optional.empty());
+
+        // WHEN
+        assertThatThrownBy(() -> authenticationService.generatePasswordToken(email))
+                .isInstanceOf(UserException.class)
+                .hasMessage("User not found");
+
+        // THEN
+        then(passwordTokenRepository).should(never()).save(any());
+    }
+
+
 
 }
