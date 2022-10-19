@@ -43,6 +43,7 @@ public class SecurityConfiguration {
                 .antMatchers(HttpMethod.GET, "/api/ecommerce/v1/products/**").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/ecommerce/v1/products").hasAnyRole("EMPLOYEE", "ADMIN")
                 .antMatchers(HttpMethod.PUT, "/api/ecommerce/v1/products/{\\d+}").hasAnyRole("EMPLOYEE, ADMIN")
+                .antMatchers(HttpMethod.PATCH, "/api/ecommerce/v1/products/{\\d+}").hasAnyRole("EMPLOYEE, ADMIN")
                 .antMatchers(HttpMethod.DELETE, "/api/ecommerce/v1/products/{\\d+}").hasAnyRole("EMPLOYEE, ADMIN")
                 .antMatchers("/api/ecommerce/v1/orders/**").hasRole("CUSTOMER")
                 .anyRequest().authenticated()
