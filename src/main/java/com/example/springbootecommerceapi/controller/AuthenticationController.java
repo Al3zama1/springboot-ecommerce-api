@@ -2,6 +2,7 @@ package com.example.springbootecommerceapi.controller;
 
 
 import com.example.springbootecommerceapi.entity.UserEntity;
+import com.example.springbootecommerceapi.model.ChangeKnownPasswordDTO;
 import com.example.springbootecommerceapi.model.SecurityUser;
 import com.example.springbootecommerceapi.service.AuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Email;
 
 
 @RestController
@@ -39,6 +41,25 @@ public class AuthenticationController {
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
+    @PatchMapping("/update-password")
+    public ResponseEntity<Void> updatePassword(@Valid @RequestBody ChangeKnownPasswordDTO knownPasswordDTO) {
+
+        authenticationService.updatePassword(knownPasswordDTO);
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PostMapping("/password-token")
+    public ResponseEntity<Void> generatePasswordToken(@Email @RequestBody String email) {
+
+        authenticationService.generatePasswordToken(email);
+
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+
+    }
+
+
 
 
 }

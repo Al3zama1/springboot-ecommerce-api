@@ -3,7 +3,9 @@ package com.example.springbootecommerceapi.service;
 import com.example.springbootecommerceapi.entity.ActivationTokenEntity;
 import com.example.springbootecommerceapi.entity.UserEntity;
 import com.example.springbootecommerceapi.exception.AccountActivationException;
+import com.example.springbootecommerceapi.exception.PasswordException;
 import com.example.springbootecommerceapi.exception.UserException;
+import com.example.springbootecommerceapi.model.ChangeKnownPasswordDTO;
 import com.example.springbootecommerceapi.model.Gender;
 import com.example.springbootecommerceapi.model.Role;
 import com.example.springbootecommerceapi.model.UserBuilder;
@@ -12,20 +14,19 @@ import com.example.springbootecommerceapi.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Currency;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -42,8 +43,13 @@ class AuthenticationServiceTest {
     HttpServletRequest request;
     @Mock
     ApplicationEventPublisher publisher;
+    @Mock
+    PasswordEncoder passwordEncoder;
     @InjectMocks
     private AuthenticationService authenticationService;
+
+    @Captor
+    ArgumentCaptor<UserEntity> userCaptor;
 
 
     @Test
@@ -131,7 +137,6 @@ class AuthenticationServiceTest {
         authenticationService.activateAccount(token);
 
         // THEN
-        ArgumentCaptor<UserEntity> userCaptor = ArgumentCaptor.forClass(UserEntity.class);
         then(activationTokenRepository).should().delete(activationToken);
         then(userRepository).should().save(userCaptor.capture());
         assertThat(userCaptor.getValue().isActive()).isEqualTo(true);
@@ -152,6 +157,90 @@ class AuthenticationServiceTest {
 
         // THEN
         then(activationTokenRepository).should(never()).delete(any());
+        then(userRepository).should(never()).save(any());
+
+    }
+
+    @Test
+    void updatePassword_whenEmailExistsAndOldPasswordMatches_changePassword() {
+        // GIVEN
+        UserEntity user = new UserBuilder()
+                .firstName("John")
+                .lastName("Last")
+                .gender(Gender.MALE)
+                .phone("(323) 456-1234")
+                .email("john.last@gmail.com")
+                .password("12345678")
+                .street("5678 S 88Th St")
+                .city("Los Angeles")
+                .state("California")
+                .zipCode("90002")
+                .build();
+        user.setRole(Role.CUSTOMER);
+        user.setUserNumber(1L);
+        user.setActive(true);
+
+        ChangeKnownPasswordDTO passwordDTO = new ChangeKnownPasswordDTO(
+                user.getEmail(), user.getPassword(), "87654321");
+
+        given(userRepository.findByEmail(user.getEmail())).willReturn(Optional.of(user));
+        given(passwordEncoder.matches(passwordDTO.getOldPassword(), user.getPassword())).willReturn(true);
+
+        // WHEN
+        authenticationService.updatePassword(passwordDTO);
+
+        // THEN
+        then(userRepository).should().save(user);
+
+    }
+
+    @Test
+    void updatePassword_whenEmailDoesntExist_throwUserException() {
+        // GIVEN
+        ChangeKnownPasswordDTO passwordDTO = new ChangeKnownPasswordDTO(
+                "john.last@gmail.com", "12345678", "87654321");
+
+
+        // WHEN
+        assertThatThrownBy(() -> authenticationService.updatePassword(passwordDTO))
+                .isInstanceOf(UserException.class)
+                .hasMessage("User not found");
+
+        // THEN
+        then(userRepository).should(never()).save(any());
+    }
+
+    @Test
+    void updatePassword_whenOldPasswordDoesNotPatch_throwPasswordException() {
+        // GIVEN
+        UserEntity user = new UserBuilder()
+                .firstName("John")
+                .lastName("Last")
+                .gender(Gender.MALE)
+                .phone("(323) 456-1234")
+                .email("john.last@gmail.com")
+                .password("12345678")
+                .street("5678 S 88Th St")
+                .city("Los Angeles")
+                .state("California")
+                .zipCode("90002")
+                .build();
+        user.setRole(Role.CUSTOMER);
+        user.setUserNumber(1L);
+        user.setActive(true);
+
+        ChangeKnownPasswordDTO passwordDTO = new ChangeKnownPasswordDTO(
+                user.getEmail(), "87654321", "87654321");
+
+        given(userRepository.findByEmail(user.getEmail())).willReturn(Optional.of(user));
+        given(passwordEncoder.matches(passwordDTO.getOldPassword(), user.getPassword())).willReturn(false);
+
+        // WHEN
+        assertThatThrownBy(() -> authenticationService.updatePassword(passwordDTO))
+                .isInstanceOf(PasswordException.class)
+                .hasMessage("Old Password is incorrect");
+
+        // THEN
         then(userRepository).should(never()).save(any());
 
     }

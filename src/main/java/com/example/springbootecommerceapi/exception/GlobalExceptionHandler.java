@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import javax.validation.ConstraintViolationException;
 import java.util.Objects;
 
 @RestControllerAdvice
@@ -43,6 +44,34 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<Object> handleAccountActivationException(
             AccountActivationException exception,
+            WebRequest request
+    ) {
+        return buildErrorResponse(
+                exception,
+                exception.getMessage(),
+                HttpStatus.BAD_REQUEST,
+                request
+        );
+    }
+
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public ResponseEntity<Object> handleInputConstraintViolation(
+            ConstraintViolationException exception,
+            WebRequest request) {
+        return buildErrorResponse(
+                exception,
+                exception.getMessage(),
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                request
+        );
+    }
+
+    @ExceptionHandler(PasswordException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<Object> handlePasswordException(
+            PasswordException exception,
             WebRequest request
     ) {
         return buildErrorResponse(

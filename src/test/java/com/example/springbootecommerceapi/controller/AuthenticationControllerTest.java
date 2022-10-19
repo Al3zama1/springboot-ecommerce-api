@@ -2,6 +2,7 @@ package com.example.springbootecommerceapi.controller;
 
 import com.example.springbootecommerceapi.config.SecurityConfiguration;
 import com.example.springbootecommerceapi.entity.UserEntity;
+import com.example.springbootecommerceapi.model.ChangeKnownPasswordDTO;
 import com.example.springbootecommerceapi.model.Gender;
 import com.example.springbootecommerceapi.model.Role;
 import com.example.springbootecommerceapi.model.UserBuilder;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -126,5 +128,71 @@ class AuthenticationControllerTest {
         // THEN
         then(authenticationService).should(never()).activateAccount(anyString());
     }
+
+    @Test
+    void updatePassword_whenValidData_return200() throws Exception {
+        // GIVEN
+        ChangeKnownPasswordDTO knownPassword = new ChangeKnownPasswordDTO(
+                "john.last@gmail.com", "12345678", "87654321");
+
+        // WHEN
+        mockMvc.perform(patch("/api/ecommerce/v1/authentication/update-password")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(knownPassword)))
+                .andExpect(status().is(HttpStatus.NO_CONTENT.value()));
+
+        // THEN
+        then(authenticationService).should().updatePassword(knownPassword);
+    }
+
+    @Test
+    void updatePassword_whenInvalidData_return422() throws Exception {
+        // GIVEN
+        ChangeKnownPasswordDTO knownPassword = new ChangeKnownPasswordDTO(
+                "john.last@gmail.com", "1234567", "87654321");
+
+        // WHEN
+        mockMvc.perform(patch("/api/ecommerce/v1/authentication/update-password")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(knownPassword)))
+                .andExpect(status().isUnprocessableEntity());
+
+        // THEN
+        then(authenticationService).should(never()).updatePassword(any());
+    }
+
+    @Test
+    void generatePasswordToken_whenValidEmailFormat_return201() throws Exception {
+        // GIVEN
+        String email = "john.last@gmail.com";
+
+        mockMvc.perform(post("/api/ecommerce/v1/authentication/password-token")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(email))
+                .andExpect(status().isCreated());
+
+        // THEN
+        then(authenticationService).should().generatePasswordToken(email);
+    }
+
+    @Test
+    void generatePasswordToken_whenInvalidEmailFormat_return422() throws Exception {
+        // GIVEN
+        String email = "john.lastgmail.com";
+
+        mockMvc.perform(post("/api/ecommerce/v1/authentication/password-token")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(email))
+                .andExpect(status().isUnprocessableEntity());
+
+        // THEN
+        then(authenticationService).should(never()).generatePasswordToken(anyString());
+    }
+
+
 
 }

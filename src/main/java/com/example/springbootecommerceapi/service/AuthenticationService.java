@@ -5,7 +5,9 @@ import com.example.springbootecommerceapi.entity.ActivationTokenEntity;
 import com.example.springbootecommerceapi.entity.UserEntity;
 import com.example.springbootecommerceapi.event.UserRegistrationEvent;
 import com.example.springbootecommerceapi.exception.AccountActivationException;
+import com.example.springbootecommerceapi.exception.PasswordException;
 import com.example.springbootecommerceapi.exception.UserException;
+import com.example.springbootecommerceapi.model.ChangeKnownPasswordDTO;
 import com.example.springbootecommerceapi.model.Role;
 import com.example.springbootecommerceapi.repository.ActivationTokenRepository;
 import com.example.springbootecommerceapi.repository.UserRepository;
@@ -93,5 +95,29 @@ public class AuthenticationService {
 
         userRepository.save(user);
         activationTokenRepository.delete(activationToken.get());
+    }
+
+    public void updatePassword(ChangeKnownPasswordDTO knownPassword) {
+        Optional<UserEntity> user = userRepository.findByEmail(knownPassword.getEmail());
+
+        if (user.isEmpty()) {
+            throw new UserException("User not found");
+        }
+
+        boolean passwordsMatch = passwordEncoder
+                .matches(knownPassword.getOldPassword(), user.get().getPassword());
+
+        if (!passwordsMatch) {
+            throw new PasswordException("Old Password is incorrect");
+        }
+
+        // update password
+        user.get().setPassword(passwordEncoder.encode(knownPassword.getNewPassword()));
+
+        // save changes
+        userRepository.save(user.get());
+    }
+
+    public void generatePasswordToken(String email) {
     }
 }
