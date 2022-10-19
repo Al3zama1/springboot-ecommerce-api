@@ -127,9 +127,9 @@ class AuthenticationControllerTest {
     }
 
     @Test
-    void updatePassword_whenValidData_return200() throws Exception {
+    void updatePassword_whenValidData_return204() throws Exception {
         // GIVEN
-        ChangeKnownPasswordDTO knownPassword = new ChangeKnownPasswordDTO(
+        KnownPassword knownPassword = new KnownPassword(
                 "john.last@gmail.com", "12345678", "87654321");
 
         // WHEN
@@ -146,7 +146,7 @@ class AuthenticationControllerTest {
     @Test
     void updatePassword_whenInvalidData_return422() throws Exception {
         // GIVEN
-        ChangeKnownPasswordDTO knownPassword = new ChangeKnownPasswordDTO(
+        KnownPassword knownPassword = new KnownPassword(
                 "john.last@gmail.com", "1234567", "87654321");
 
         // WHEN
@@ -188,6 +188,40 @@ class AuthenticationControllerTest {
 
         // THEN
         then(authenticationService).should(never()).generatePasswordToken(any());
+    }
+
+    @Test
+    void changePassword_whenTokenIsGiven_return204() throws Exception {
+        // GIVEN
+        String token = UUID.randomUUID().toString();
+        ForgottenPassword forgottenPassword = new ForgottenPassword("87654321", "87654321");
+
+        // WHEN
+        mockMvc.perform(patch("/api/ecommerce/v1/authentication/change-password")
+                .with(csrf())
+                .param("token", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(forgottenPassword)))
+                .andExpect(status().is(HttpStatus.NO_CONTENT.value()));
+
+        // THEN
+        then(authenticationService).should().changePassword(forgottenPassword, token);
+    }
+
+    @Test
+    void changePassword_whenTokenIsNotGiven_return400() throws Exception {
+        // GIVEN
+        ForgottenPassword forgottenPassword = new ForgottenPassword("87654321", "87654321");
+
+        // WHEN
+        mockMvc.perform(patch("/api/ecommerce/v1/authentication/change-password")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(forgottenPassword)))
+                .andExpect(status().isBadRequest());
+
+        // THEN
+        then(authenticationService).should(never()).changePassword(any(), anyString());
     }
 
 

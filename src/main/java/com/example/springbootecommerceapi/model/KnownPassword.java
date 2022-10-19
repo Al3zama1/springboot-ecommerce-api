@@ -5,13 +5,15 @@ import javax.validation.constraints.Size;
 import java.util.Objects;
 
 public class KnownPassword {
-
     @Email
     private String email;
     @Size(min = 8)
     private String oldPassword;
     @Size(min = 8)
     private String newPassword;
+
+    public KnownPassword() {
+    }
 
     public KnownPassword(String email, String oldPassword, String newPassword) {
         this.email = email;
@@ -58,7 +60,7 @@ public class KnownPassword {
 
     @Override
     public String toString() {
-        return "KnownPassword{" +
+        return "ChangeKnownPasswordDTO{" +
                 "email='" + email + '\'' +
                 ", oldPassword='" + oldPassword + '\'' +
                 ", newPassword='" + newPassword + '\'' +

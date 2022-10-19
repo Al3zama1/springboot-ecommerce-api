@@ -2,19 +2,17 @@ package com.example.springbootecommerceapi.controller;
 
 
 import com.example.springbootecommerceapi.entity.UserEntity;
-import com.example.springbootecommerceapi.model.ChangeKnownPasswordDTO;
+import com.example.springbootecommerceapi.model.ForgottenPassword;
+import com.example.springbootecommerceapi.model.KnownPassword;
 import com.example.springbootecommerceapi.model.EmailDTO;
-import com.example.springbootecommerceapi.model.SecurityUser;
 import com.example.springbootecommerceapi.service.AuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Email;
 
 
 @RestController
@@ -44,7 +42,7 @@ public class AuthenticationController {
     }
 
     @PatchMapping("/update-password")
-    public ResponseEntity<Void> updatePassword(@Valid @RequestBody ChangeKnownPasswordDTO knownPasswordDTO) {
+    public ResponseEntity<Void> updatePassword(@Valid @RequestBody KnownPassword knownPasswordDTO) {
 
         authenticationService.updatePassword(knownPasswordDTO);
 
@@ -57,6 +55,18 @@ public class AuthenticationController {
         authenticationService.generatePasswordToken(emailDTO);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
+
+    }
+
+    @PatchMapping("/change-password")
+    public ResponseEntity<Void> changePassword(
+            @Valid @RequestBody ForgottenPassword forgottenPassword,
+            @RequestParam String token
+    ) {
+
+        authenticationService.changePassword(forgottenPassword, token);
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 
     }
 

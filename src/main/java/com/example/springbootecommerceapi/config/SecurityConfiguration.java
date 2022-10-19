@@ -99,7 +99,7 @@ public class SecurityConfiguration {
                 .lastName("Last")
                 .gender(Gender.MALE)
                 .phone("(323) 456-1234")
-                .email("customer2@gmail.com")
+                .email("admin@gmail.com")
                 .password(passwordEncoder.encode("12345678"))
                 .street("5678 S 88Th St")
                 .city("Los Angeles")
@@ -107,7 +107,7 @@ public class SecurityConfiguration {
                 .zipCode("90002")
                 .build();
         admin.setActive(true);
-        admin.setRole(Role.CUSTOMER);
+        admin.setRole(Role.ADMIN);
         return  args -> {
             userRepository.saveAll(List.of(customer, admin, employee));
         };

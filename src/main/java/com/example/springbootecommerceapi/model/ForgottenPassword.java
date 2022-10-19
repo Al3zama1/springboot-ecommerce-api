@@ -1,9 +1,12 @@
 package com.example.springbootecommerceapi.model;
 
+import javax.validation.constraints.Size;
 import java.util.Objects;
 
 public class ForgottenPassword {
+    @Size(min = 8)
     private String password;
+    @Size(min = 8)
     private String verifyPassword;
 
     public ForgottenPassword(String password, String verifyPassword) {

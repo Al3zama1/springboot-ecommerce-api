@@ -5,6 +5,7 @@ import com.example.springbootecommerceapi.entity.PasswordTokenEntity;
 import com.example.springbootecommerceapi.entity.UserEntity;
 import com.example.springbootecommerceapi.exception.AccountActivationException;
 import com.example.springbootecommerceapi.exception.PasswordException;
+import com.example.springbootecommerceapi.exception.PasswordTokenException;
 import com.example.springbootecommerceapi.exception.UserException;
 import com.example.springbootecommerceapi.model.*;
 import com.example.springbootecommerceapi.repository.ActivationTokenRepository;
@@ -182,7 +183,7 @@ class AuthenticationServiceTest {
         user.setUserNumber(1L);
         user.setActive(true);
 
-        ChangeKnownPasswordDTO passwordDTO = new ChangeKnownPasswordDTO(
+        KnownPassword passwordDTO = new KnownPassword(
                 user.getEmail(), user.getPassword(), "87654321");
 
         given(userRepository.findByEmail(user.getEmail())).willReturn(Optional.of(user));
@@ -199,7 +200,7 @@ class AuthenticationServiceTest {
     @Test
     void updatePassword_whenEmailDoesntExist_throwUserException() {
         // GIVEN
-        ChangeKnownPasswordDTO passwordDTO = new ChangeKnownPasswordDTO(
+        KnownPassword passwordDTO = new KnownPassword(
                 "john.last@gmail.com", "12345678", "87654321");
 
 
@@ -231,7 +232,7 @@ class AuthenticationServiceTest {
         user.setUserNumber(1L);
         user.setActive(true);
 
-        ChangeKnownPasswordDTO passwordDTO = new ChangeKnownPasswordDTO(
+        KnownPassword passwordDTO = new KnownPassword(
                 user.getEmail(), "87654321", "87654321");
 
         given(userRepository.findByEmail(user.getEmail())).willReturn(Optional.of(user));
@@ -298,6 +299,95 @@ class AuthenticationServiceTest {
 
         // THEN
         then(passwordTokenRepository).should(never()).save(any());
+    }
+
+    @Test
+    void changePassword_whenTokenIsValid_changePassword() {
+        // GIVEN
+        String token = UUID.randomUUID().toString();
+        UserEntity user = new UserBuilder()
+                .firstName("John")
+                .lastName("Last")
+                .gender(Gender.MALE)
+                .phone("(323) 456-1234")
+                .email("john.last@gmail.com")
+                .password("12345678")
+                .street("5678 S 88Th St")
+                .city("Los Angeles")
+                .state("California")
+                .zipCode("90002")
+                .build();
+        user.setRole(Role.CUSTOMER);
+        user.setUserNumber(1L);
+        user.setActive(true);
+
+        PasswordTokenEntity passwordToken = new PasswordTokenEntity(user, token);
+        ForgottenPassword forgottenPassword = new ForgottenPassword("87654321", "87654321");
+
+        // assume token is valid
+        given(passwordTokenRepository.findByToken(token)).willReturn(Optional.of(passwordToken));
+
+        // WHEN
+        authenticationService.changePassword(forgottenPassword, token);
+
+        // THEN
+        then(userRepository).should().save(user);
+        then(passwordTokenRepository).should().delete(passwordToken);
+    }
+
+    @Test
+    void changePassword_whenTokenIsNotValid_throwPasswordTokenException() {
+        // GIVEN
+        String token = UUID.randomUUID().toString();
+        ForgottenPassword forgottenPassword = new ForgottenPassword("87654321", "87654321");
+
+        // assume password token is invalid
+        given(passwordTokenRepository.findByToken(token)).willReturn(Optional.empty());
+
+        // WHEN
+        assertThatThrownBy(() -> authenticationService.changePassword(forgottenPassword, token))
+                .isInstanceOf(PasswordTokenException.class)
+                .hasMessage("Invalid token");
+
+        // THEN
+        then(userRepository).should(never()).save(any());
+        then(passwordTokenRepository).should(never()).delete(any());
+    }
+
+    @Test
+    void changePassword_whenPasswordsDontMatch_throwPasswordException() {
+        String token = UUID.randomUUID().toString();
+        UserEntity user = new UserBuilder()
+                .firstName("John")
+                .lastName("Last")
+                .gender(Gender.MALE)
+                .phone("(323) 456-1234")
+                .email("john.last@gmail.com")
+                .password("12345678")
+                .street("5678 S 88Th St")
+                .city("Los Angeles")
+                .state("California")
+                .zipCode("90002")
+                .build();
+        user.setRole(Role.CUSTOMER);
+        user.setUserNumber(1L);
+        user.setActive(true);
+
+        PasswordTokenEntity passwordToken = new PasswordTokenEntity(user, token);
+        ForgottenPassword forgottenPassword = new ForgottenPassword("87654321", "87654821");
+
+        // assume token is valid
+        given(passwordTokenRepository.findByToken(token)).willReturn(Optional.of(passwordToken));
+
+        // WHEN
+        assertThatThrownBy(() -> authenticationService.changePassword(forgottenPassword, token))
+                .isInstanceOf(PasswordException.class)
+                .hasMessage("Passwords must match");
+
+        // THEN
+        then(userRepository).should(never()).save(any());
+        then(passwordTokenRepository).should(never()).delete(any());
+
     }
 
 

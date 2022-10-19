@@ -4,11 +4,14 @@ package com.example.springbootecommerceapi.service;
 import com.example.springbootecommerceapi.entity.ActivationTokenEntity;
 import com.example.springbootecommerceapi.entity.PasswordTokenEntity;
 import com.example.springbootecommerceapi.entity.UserEntity;
+import com.example.springbootecommerceapi.event.ChangePasswordEvent;
 import com.example.springbootecommerceapi.event.UserRegistrationEvent;
 import com.example.springbootecommerceapi.exception.AccountActivationException;
 import com.example.springbootecommerceapi.exception.PasswordException;
+import com.example.springbootecommerceapi.exception.PasswordTokenException;
 import com.example.springbootecommerceapi.exception.UserException;
-import com.example.springbootecommerceapi.model.ChangeKnownPasswordDTO;
+import com.example.springbootecommerceapi.model.ForgottenPassword;
+import com.example.springbootecommerceapi.model.KnownPassword;
 import com.example.springbootecommerceapi.model.EmailDTO;
 import com.example.springbootecommerceapi.model.Role;
 import com.example.springbootecommerceapi.repository.ActivationTokenRepository;
@@ -71,16 +74,16 @@ public class AuthenticationService {
         ActivationTokenEntity activationToken = new ActivationTokenEntity(savedUser, token);
         activationTokenRepository.save(activationToken);
 
-        String url = authenticationUrl(token);
+        String url = applicationUrl(token, "activate-account");
         publisher.publishEvent(new UserRegistrationEvent(customer, url));
 
     }
 
-    private String authenticationUrl(String token) {
+    private String applicationUrl(String token, String path) {
         return "http://" + request.getServerName() + ":" +
                 request.getServerPort() +
                 "/api/ecommerce/v1/authentication" +
-                "/activate-account?token=" + token;
+                "/" + path + "?token=" + token;
     }
 
     public void RegisterEmployee(UserEntity employee) {
@@ -103,7 +106,7 @@ public class AuthenticationService {
         activationTokenRepository.delete(activationToken.get());
     }
 
-    public void updatePassword(ChangeKnownPasswordDTO knownPassword) {
+    public void updatePassword(KnownPassword knownPassword) {
         Optional<UserEntity> user = userRepository.findByEmail(knownPassword.getEmail());
 
         if (user.isEmpty()) {
@@ -136,5 +139,27 @@ public class AuthenticationService {
         PasswordTokenEntity passwordToken = new PasswordTokenEntity(user.get(), token);
 
         passwordTokenRepository.save(passwordToken);
+        publisher.publishEvent(new ChangePasswordEvent(user.get(), applicationUrl(token, "change-password")));
+    }
+
+    public void changePassword(ForgottenPassword forgottenPassword, String token) {
+        // verify token
+        Optional<PasswordTokenEntity> passwordToken = passwordTokenRepository.findByToken(token);
+
+        if (passwordToken.isEmpty()) {
+            throw  new PasswordTokenException("Invalid token");
+        }
+
+        if (!forgottenPassword.getPassword().equals(forgottenPassword.getVerifyPassword())) {
+            throw new PasswordException("Passwords must match");
+        }
+
+        // change password
+        UserEntity user = passwordToken.get().getUserEntity();
+        user.setPassword(passwordEncoder.encode(forgottenPassword.getVerifyPassword()));
+
+        // save changes
+        userRepository.save(user);
+        passwordTokenRepository.delete(passwordToken.get());
     }
 }
