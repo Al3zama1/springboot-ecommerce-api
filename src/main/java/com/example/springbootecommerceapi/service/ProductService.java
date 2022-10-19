@@ -32,4 +32,7 @@ public class ProductService {
 
         return product.get();
     }
+
+    public void addProduct(ProductEntity product) {
+    }
 }

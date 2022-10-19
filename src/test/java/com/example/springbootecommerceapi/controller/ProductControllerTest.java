@@ -2,6 +2,11 @@ package com.example.springbootecommerceapi.controller;
 
 import com.example.springbootecommerceapi.config.SecurityConfiguration;
 import com.example.springbootecommerceapi.entity.ProductEntity;
+import com.example.springbootecommerceapi.entity.UserEntity;
+import com.example.springbootecommerceapi.model.Gender;
+import com.example.springbootecommerceapi.model.Role;
+import com.example.springbootecommerceapi.model.SecurityUser;
+import com.example.springbootecommerceapi.model.UserBuilder;
 import com.example.springbootecommerceapi.repository.UserRepository;
 import com.example.springbootecommerceapi.service.JpaUserDetailsService;
 import com.example.springbootecommerceapi.service.ProductService;
@@ -21,11 +26,15 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -104,7 +113,48 @@ class ProductControllerTest {
         then(productService).should(never()).getProduct(anyLong());
     }
 
+    @Test
+    void addProduct_whenValidInputConstraints_return201() throws Exception {
+        // GIVEN
+        ProductEntity product = new ProductEntity(
+                "Soccer Ball", 10,
+                "The official World Cup 2022 soccer ball", 40
+        );
 
+
+
+        // WHEN
+        mockMvc.perform(post("/api/ecommerce/v1/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(product))
+                .with(csrf())
+                .with(user("john.last@gmail.com").password("12345678").roles("EMPLOYEE")))
+                .andExpect(status().isCreated());
+
+        // THEN
+        then(productService).should().addProduct(product);
+    }
+
+
+    @Test
+    void addProduct_whenInvalidInputConstraints_return422() throws Exception {
+        // GIVEN
+        ProductEntity product = new ProductEntity(
+                "", 10,
+                "The official World Cup 2022 soccer ball", 40
+        );
+
+        // WHEN
+        mockMvc.perform(post("/api/ecommerce/v1/products")
+                .with(csrf())
+                .with(user("john.last@gmail.com").password("12345678").roles("EMPLOYEE"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(product)))
+                .andExpect(status().isUnprocessableEntity());
+
+        // THEN
+        then(productService).should(never()).addProduct(any());
+    }
 
 
 }
