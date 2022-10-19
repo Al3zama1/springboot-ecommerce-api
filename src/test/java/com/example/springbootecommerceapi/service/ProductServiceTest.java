@@ -9,13 +9,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
@@ -66,6 +66,44 @@ class ProductServiceTest {
                 .isInstanceOf(ProductException.class)
                 .hasMessage("Product does not exist");
 
+    }
+
+    @Test
+    void addProduct_whenProductNameIsUnique_saveProduct() {
+        // GIVEN
+        ProductEntity product = new ProductEntity(
+                "Soccer Ball", 10,
+                "The official World Cup 2022 soccer ball", 40
+        );
+
+        // assume product name is unique
+        given(productRepository.existsByProductName(product.getProductName())).willReturn(false);
+
+        // WHEN
+        productService.addProduct(product);
+
+        // THEN
+        then(productRepository).should().existsByProductName(product.getProductName());
+        then(productRepository).should().save(product);
+    }
+
+    @Test
+    void addProduct_whenProductNameIsNotUnique_throwProductException() {
+        // GIVEN
+        ProductEntity product = new ProductEntity(
+                "Soccer Ball", 10,
+                "The official World Cup 2022 soccer ball", 40
+        );
+
+        given(productRepository.existsByProductName(product.getProductName())).willReturn(true);
+
+        // WHEN
+        assertThatThrownBy(() -> productService.addProduct(product))
+                .isInstanceOf(ProductException.class)
+                .hasMessage("Product with given name exists");
+
+        // THEN
+        then(productRepository).should(never()).save(any());
     }
 
 }

@@ -34,5 +34,13 @@ public class ProductService {
     }
 
     public void addProduct(ProductEntity product) {
+        // make sure product name is unique
+        boolean exists = productRepository.existsByProductName(product.getProductName());
+
+        if (exists) {
+            throw new ProductException("Product with given name exists");
+        }
+
+        productRepository.save(product);
     }
 }
