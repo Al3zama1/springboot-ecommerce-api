@@ -17,17 +17,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.internal.bytebuddy.matcher.ElementMatchers.is;
-import static org.assertj.core.internal.bytebuddy.matcher.ElementMatchers.isEquals;
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.never;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -47,7 +44,7 @@ class ProductControllerTest {
 
 
     @Test
-    void products_returnListOfProductsAndStatus200() throws Exception {
+    void getAllProducts_returnListOfProductsAndStatus200() throws Exception {
         // GIVEN
         ProductEntity product = new ProductEntity(
                 1L, "Soccer Ball", 10,
@@ -69,6 +66,45 @@ class ProductControllerTest {
 //        List<ProductEntity> list = Arrays.asList(response);
         assertThat(response[0]).isEqualTo(product);
     }
+
+    @Test
+    void getProduct_returnProductAndStatus200() throws Exception {
+        // GIVEN
+        long productNumber = 1L;
+        ProductEntity product = new ProductEntity(
+                productNumber, "Soccer Ball", 10,
+                "The official World Cup 2022 soccer ball", 40
+        );
+        given(productService.getProduct(productNumber)).willReturn(product);
+
+        // WHEN
+        MvcResult result =  mockMvc.perform(get("/api/ecommerce/v1/products/{product}", productNumber))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        ProductEntity returnedProduct = objectMapper.readValue(
+                result.getResponse().getContentAsString(), ProductEntity.class
+        );
+
+        // THEN
+        then(productService).should().getProduct(productNumber);
+        assertThat(returnedProduct).isEqualTo(product);
+    }
+
+    @Test
+    void getProduct_whenInvalidProductNumber_thenReturn422() throws Exception {
+        // GIVE
+        long productNumber = -1L;
+
+        // WHEN
+        mockMvc.perform(get("/api/ecommerce/v1/products/{product}", productNumber))
+                .andExpect(status().isUnprocessableEntity());
+
+        // THEN
+        then(productService).should(never()).getProduct(anyLong());
+    }
+
+
 
 
 }
