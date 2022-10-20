@@ -4,6 +4,7 @@ import com.example.springbootecommerceapi.config.SecurityConfiguration;
 import com.example.springbootecommerceapi.entity.ProductEntity;
 import com.example.springbootecommerceapi.entity.UserEntity;
 import com.example.springbootecommerceapi.model.*;
+import com.example.springbootecommerceapi.repository.ProductRepository;
 import com.example.springbootecommerceapi.repository.UserRepository;
 import com.example.springbootecommerceapi.service.JpaUserDetailsService;
 import com.example.springbootecommerceapi.service.ProductService;
@@ -48,6 +49,8 @@ class ProductControllerTest {
     private ProductService productService;
     @MockBean
     private UserRepository userRepository;
+    @MockBean
+    ProductRepository productRepository;
 
 
     @Test

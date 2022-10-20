@@ -1,9 +1,11 @@
 package com.example.springbootecommerceapi.config;
 
+import com.example.springbootecommerceapi.entity.ProductEntity;
 import com.example.springbootecommerceapi.entity.UserEntity;
 import com.example.springbootecommerceapi.model.Gender;
 import com.example.springbootecommerceapi.model.Role;
 import com.example.springbootecommerceapi.model.UserBuilder;
+import com.example.springbootecommerceapi.repository.ProductRepository;
 import com.example.springbootecommerceapi.repository.UserRepository;
 import com.example.springbootecommerceapi.service.JpaUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +69,7 @@ public class SecurityConfiguration {
     and before the mail application runs
      */
     @Bean
-    CommandLineRunner commandLineRunner(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    CommandLineRunner commandLineRunner(UserRepository userRepository, ProductRepository productRepository, PasswordEncoder passwordEncoder) {
         UserEntity employee = new UserBuilder()
                 .firstName("employee")
                 .lastName("Last")
@@ -110,8 +112,11 @@ public class SecurityConfiguration {
                 .build();
         admin.setActive(true);
         admin.setRole(Role.ADMIN);
+
+        ProductEntity product = new ProductEntity("ball", 20, "soccer ball", 30);
         return  args -> {
             userRepository.saveAll(List.of(customer, admin, employee));
+            productRepository.save(product);
         };
     }
 

@@ -8,6 +8,7 @@ import com.example.springbootecommerceapi.model.Gender;
 import com.example.springbootecommerceapi.model.OrderDTO;
 import com.example.springbootecommerceapi.model.Role;
 import com.example.springbootecommerceapi.model.UserBuilder;
+import com.example.springbootecommerceapi.repository.ProductRepository;
 import com.example.springbootecommerceapi.repository.UserRepository;
 import com.example.springbootecommerceapi.service.JpaUserDetailsService;
 import com.example.springbootecommerceapi.service.OrderService;
@@ -43,6 +44,8 @@ class OrderControllerTest {
 
     @MockBean
     private UserRepository userRepository;
+    @MockBean
+    ProductRepository productRepository;
     @MockBean
     private OrderService orderService;
 
@@ -125,6 +128,7 @@ class OrderControllerTest {
         OrderEntity[] returnedOrder = objectMapper.readValue(result.getResponse().getContentAsString(), OrderEntity[].class);
 
         // THEN
+        System.out.println(returnedOrder[0].toString());
         then(orderService).should().getAllOrders(customer.getEmail());
         assertThat(returnedOrder[0]).isEqualTo(order);
     }

@@ -3,6 +3,7 @@ package com.example.springbootecommerceapi.controller;
 import com.example.springbootecommerceapi.config.SecurityConfiguration;
 import com.example.springbootecommerceapi.entity.UserEntity;
 import com.example.springbootecommerceapi.model.*;
+import com.example.springbootecommerceapi.repository.ProductRepository;
 import com.example.springbootecommerceapi.repository.UserRepository;
 import com.example.springbootecommerceapi.service.AuthenticationService;
 import com.example.springbootecommerceapi.service.JpaUserDetailsService;
@@ -38,6 +39,8 @@ class AuthenticationControllerTest {
     AuthenticationService authenticationService;
     @MockBean
     UserRepository userRepository;
+    @MockBean
+    ProductRepository productRepository;
 
     @Test
     void registerCustomer_whenValidData_return201() throws Exception {

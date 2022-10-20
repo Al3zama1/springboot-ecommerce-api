@@ -1,6 +1,7 @@
 package com.example.springbootecommerceapi.entity;
 
 import com.example.springbootecommerceapi.model.OrderStatus;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -27,7 +28,7 @@ public class OrderEntity {
     )
     private Long orderNumber;
     @ManyToOne(
-            cascade = CascadeType.ALL
+            fetch = FetchType.LAZY
     )
     @JoinColumn(
             name = "UserNumber",
@@ -38,10 +39,12 @@ public class OrderEntity {
             name = "datePlaced",
             nullable = false
     )
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
     private LocalDateTime datePlaced;
     @Column(
             name = "dateShipped"
     )
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
     private LocalDateTime dateShipped;
     @Column(
             nullable = false
