@@ -4,6 +4,7 @@ import com.example.springbootecommerceapi.model.OrderStatus;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(
@@ -49,4 +50,77 @@ public class OrderEntity {
             EnumType.STRING
     )
     private OrderStatus status;
+
+    public OrderEntity() {
+    }
+
+    public OrderEntity(UserEntity customer) {
+        this.status = OrderStatus.PROCESSING;
+        this.customer = customer;
+        this.datePlaced = LocalDateTime.now();
+    }
+
+    public Long getOrderNumber() {
+        return orderNumber;
+    }
+
+    public void setOrderNumber(Long orderNumber) {
+        this.orderNumber = orderNumber;
+    }
+
+    public UserEntity getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(UserEntity customer) {
+        this.customer = customer;
+    }
+
+    public LocalDateTime getDatePlaced() {
+        return datePlaced;
+    }
+
+    public void setDatePlaced(LocalDateTime datePlaced) {
+        this.datePlaced = datePlaced;
+    }
+
+    public LocalDateTime getDateShipped() {
+        return dateShipped;
+    }
+
+    public void setDateShipped(LocalDateTime dateShipped) {
+        this.dateShipped = dateShipped;
+    }
+
+    public OrderStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(OrderStatus status) {
+        this.status = status;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        OrderEntity that = (OrderEntity) o;
+        return Objects.equals(orderNumber, that.orderNumber) && Objects.equals(customer, that.customer) && Objects.equals(datePlaced, that.datePlaced) && Objects.equals(dateShipped, that.dateShipped) && status == that.status;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(orderNumber, customer, datePlaced, dateShipped, status);
+    }
+
+    @Override
+    public String toString() {
+        return "OrderEntity{" +
+                "orderNumber=" + orderNumber +
+                ", customer=" + customer +
+                ", datePlaced=" + datePlaced +
+                ", dateShipped=" + dateShipped +
+                ", status=" + status +
+                '}';
+    }
 }
