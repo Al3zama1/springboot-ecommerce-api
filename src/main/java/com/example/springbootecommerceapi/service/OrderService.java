@@ -88,4 +88,15 @@ public class OrderService {
 
         orderItemService.saveItems(savedOrder, products, productAndQuantity);
     }
+
+    public List<OrderEntity> getAllOrders(String userEmail) {
+        // get customer
+        Optional<UserEntity> customer = userRepository.findByEmail(userEmail);
+
+        if (customer.isEmpty()) {
+            throw new UserException("User does not exist");
+        }
+
+        return orderRepository.findByCustomer(customer.get());
+    }
 }

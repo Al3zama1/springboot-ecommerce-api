@@ -154,8 +154,58 @@ class OrderServiceTest {
 
         // THEN
         then(orderRepository).should(never()).save(any());
-
-
     }
+
+    @Test
+    void getAllOrders_whenCustomerExists_returnListOfCustomerOrders() {
+        // GIVEN
+        String email = "john.last@gmail.com";
+
+        // assume that user exists
+        UserEntity customer = new UserBuilder()
+                .firstName("John")
+                .lastName("Last")
+                .gender(Gender.MALE)
+                .phone("(323) 456-1234")
+                .email(email)
+                .password("12345678")
+                .street("5678 S 88Th St")
+                .city("Los Angeles")
+                .state("California")
+                .zipCode("90002")
+                .build();
+        customer.setRole(Role.CUSTOMER);
+        customer.setActive(true);
+        customer.setUserNumber(1L);
+
+        // assume that customer exists
+        given(userRepository.findByEmail(email)).willReturn(Optional.of(customer));
+
+        // WHEN
+        orderService.getAllOrders(email);
+
+        // THEN
+        then(orderRepository).should().findByCustomer(customer);
+    }
+
+    @Test
+    void getAllOrders_whenCustomerDoesNotExist_throwUserException() {
+        // GIVEN
+        String email = "john.last@gmail.com";
+
+
+        // assume that customer does not exist
+        given(userRepository.findByEmail(email)).willReturn(Optional.empty());
+
+        // WHEN
+        assertThatThrownBy(() -> orderService.getAllOrders(email))
+                .isInstanceOf(UserException.class)
+                        .hasMessage("User does not exist");
+
+
+        // THEN
+        then(orderRepository).should(never()).findByCustomer(any());
+    }
+
 
 }

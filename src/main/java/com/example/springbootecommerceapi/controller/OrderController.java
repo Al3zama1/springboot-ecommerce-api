@@ -1,5 +1,6 @@
 package com.example.springbootecommerceapi.controller;
 
+import com.example.springbootecommerceapi.entity.OrderEntity;
 import com.example.springbootecommerceapi.model.OrderDTO;
 import com.example.springbootecommerceapi.model.SecurityUser;
 import com.example.springbootecommerceapi.service.OrderService;
@@ -10,10 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.security.Principal;
@@ -38,5 +36,13 @@ public class OrderController {
     ) {
         orderService.createOrder(orderItems, userEmail);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @GetMapping("")
+    public ResponseEntity<List<OrderEntity>> getAllOrders(
+            @AuthenticationPrincipal(expression = "username") String userEmail
+    ) {
+        List<OrderEntity> orders = orderService.getAllOrders(userEmail);
+        return ResponseEntity.ok(orders);
     }
 }
