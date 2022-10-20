@@ -2,6 +2,7 @@ package com.example.springbootecommerceapi.service;
 
 import com.example.springbootecommerceapi.entity.ProductEntity;
 import com.example.springbootecommerceapi.exception.ProductException;
+import com.example.springbootecommerceapi.model.UpdateProduct;
 import com.example.springbootecommerceapi.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -54,5 +55,8 @@ public class ProductService {
 
         productRepository.delete(product.get());
 
+    }
+
+    public void updateProduct(UpdateProduct updateData, long productNumber) {
     }
 }

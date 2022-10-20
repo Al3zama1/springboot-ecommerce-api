@@ -1,6 +1,7 @@
 package com.example.springbootecommerceapi.controller;
 
 import com.example.springbootecommerceapi.entity.ProductEntity;
+import com.example.springbootecommerceapi.model.UpdateProduct;
 import com.example.springbootecommerceapi.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -46,5 +47,13 @@ public class ProductController {
     public ResponseEntity<Void> removeProduct(@Positive @PathVariable long productNumber) {
         productService.removeProduct(productNumber);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PatchMapping("/{productNumber}")
+    public ResponseEntity<Void> updateProduct(@Valid @RequestBody UpdateProduct updateProduct,
+                                              @PathVariable long productNumber) {
+        productService.updateProduct(updateProduct, productNumber);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+
     }
 }

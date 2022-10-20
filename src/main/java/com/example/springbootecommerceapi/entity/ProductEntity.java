@@ -46,19 +46,19 @@ public class ProductEntity {
             nullable = false
     )
     @PositiveOrZero
-    private double productPrice;
+    private float productPrice;
 
     public ProductEntity() {
     }
 
-    public ProductEntity(String productName, int productStock, String productDescription, double productPrice) {
+    public ProductEntity(String productName, int productStock, String productDescription, float productPrice) {
         this.productName = productName;
         this.productStock = productStock;
         this.productDescription = productDescription;
         this.productPrice = productPrice;
     }
 
-    public ProductEntity(Long productNumber, String productName, int productStock, String productDescription, double productPrice) {
+    public ProductEntity(Long productNumber, String productName, int productStock, String productDescription, float productPrice) {
         this.productNumber = productNumber;
         this.productName = productName;
         this.productStock = productStock;
@@ -102,7 +102,7 @@ public class ProductEntity {
         return productPrice;
     }
 
-    public void setProductPrice(double productPrice) {
+    public void setProductPrice(float productPrice) {
         this.productPrice = productPrice;
     }
 

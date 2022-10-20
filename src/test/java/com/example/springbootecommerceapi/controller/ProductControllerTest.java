@@ -3,10 +3,7 @@ package com.example.springbootecommerceapi.controller;
 import com.example.springbootecommerceapi.config.SecurityConfiguration;
 import com.example.springbootecommerceapi.entity.ProductEntity;
 import com.example.springbootecommerceapi.entity.UserEntity;
-import com.example.springbootecommerceapi.model.Gender;
-import com.example.springbootecommerceapi.model.Role;
-import com.example.springbootecommerceapi.model.SecurityUser;
-import com.example.springbootecommerceapi.model.UserBuilder;
+import com.example.springbootecommerceapi.model.*;
 import com.example.springbootecommerceapi.repository.UserRepository;
 import com.example.springbootecommerceapi.service.JpaUserDetailsService;
 import com.example.springbootecommerceapi.service.ProductService;
@@ -193,5 +190,45 @@ class ProductControllerTest {
 
         // THEN
         then(productService).should(never()).removeProduct(anyLong());
+    }
+
+    @Test
+    void updateProduct_whenValidValues_return204() throws Exception {
+        // GIVEN
+        long productNumber = 1L;
+        UpdateProduct updateData = new UpdateProduct(
+                "The official World Cup 2022 soccer ball",
+                20, 45);
+
+        // WHEN
+        mockMvc.perform(patch("/api/ecommerce/v1/products/{product}", productNumber)
+                .with(csrf())
+                .with(user("john.last@gmail.com").password("12345678").roles("EMPLOYEE"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateData)))
+                .andExpect(status().is(HttpStatus.NO_CONTENT.value()));
+
+        // THEN
+        then(productService).should().updateProduct(updateData, productNumber);
+    }
+
+    @Test
+    void updateProduct_whenInvValidValues_return422() throws Exception{
+        // GIVEN
+        long productNumber = 1L;
+        UpdateProduct updateData = new UpdateProduct(
+                "The official World Cup 2022 soccer ball",
+                -20, 45);
+
+        // WHEN
+        mockMvc.perform(patch("/api/ecommerce/v1/products/{product}", productNumber)
+                        .with(csrf())
+                        .with(user("john.last@gmail.com").password("12345678").roles("EMPLOYEE"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateData)))
+                .andExpect(status().isUnprocessableEntity());
+
+        // THEN
+        then(productService).should(never()).updateProduct(any(), anyLong());
     }
 }
