@@ -41,10 +41,11 @@ public class SecurityConfiguration {
                 .authorizeRequests()
                 .antMatchers("/api/ecommerce/v1/authentication/**", "/h2-console/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/ecommerce/v1/products/**").permitAll()
-                .antMatchers(HttpMethod.POST, "/api/ecommerce/v1/products").hasAnyRole("EMPLOYEE", "ADMIN")
-                .antMatchers(HttpMethod.PUT, "/api/ecommerce/v1/products/{\\d+}").hasAnyRole("EMPLOYEE, ADMIN")
-                .antMatchers(HttpMethod.PATCH, "/api/ecommerce/v1/products/{\\d+}").hasAnyRole("EMPLOYEE, ADMIN")
-                .antMatchers(HttpMethod.DELETE, "/api/ecommerce/v1/products/{\\d+}").hasAnyRole("EMPLOYEE, ADMIN")
+                .antMatchers("/api/ecommerce/v1/products/**").hasAnyRole("EMPLOYEE", "ADMIN")
+//                .antMatchers(HttpMethod.POST, "/api/ecommerce/v1/products").hasAnyRole("EMPLOYEE", "ADMIN")
+//                .antMatchers(HttpMethod.PUT, "/api/ecommerce/v1/products/{\\d+}").hasAnyRole("EMPLOYEE, ADMIN")
+//                .antMatchers(HttpMethod.PATCH, "/api/ecommerce/v1/products/{\\d+}").hasAnyRole("EMPLOYEE, ADMIN")
+//                .antMatchers(HttpMethod.DELETE, "/api/ecommerce/v1/products/**").hasAnyRole("EMPLOYEE, ADMIN")
                 .antMatchers("/api/ecommerce/v1/orders/**").hasRole("CUSTOMER")
                 .anyRequest().authenticated()
                 .and()
@@ -82,7 +83,7 @@ public class SecurityConfiguration {
         employee.setActive(true);
         employee.setRole(Role.EMPLOYEE);
         UserEntity customer = new UserBuilder()
-                .firstName("customer1")
+                .firstName("customer")
                 .lastName("Last")
                 .gender(Gender.MALE)
                 .phone("(323) 456-1234")
@@ -96,7 +97,7 @@ public class SecurityConfiguration {
         customer.setActive(true);
         customer.setRole(Role.CUSTOMER);
         UserEntity admin = new UserBuilder()
-                .firstName("customer2")
+                .firstName("admin")
                 .lastName("Last")
                 .gender(Gender.MALE)
                 .phone("(323) 456-1234")

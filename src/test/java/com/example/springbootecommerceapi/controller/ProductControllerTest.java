@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -26,6 +27,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
@@ -33,8 +35,7 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -156,5 +157,41 @@ class ProductControllerTest {
         then(productService).should(never()).addProduct(any());
     }
 
+    @Test
+    void removeProduct_whenValidProductNumber_return204() throws Exception {
+        // GIVEN
+        ProductEntity product = new ProductEntity(
+                1L,"Soccer Ball", 10,
+                "The official World Cup 2022 soccer ball", 40
+        );
 
+        // WHEN
+        mockMvc.perform(delete("/api/ecommerce/v1/products/{product}", product.getProductNumber())
+                .with(csrf())
+                .with(user("john.last@gmail.com").password("12345678").roles("EMPLOYEE"))
+                )
+                .andExpect(status().is(HttpStatus.NO_CONTENT.value()));
+
+        // THEN
+        then(productService).should().removeProduct(product.getProductNumber());
+    }
+
+    @Test
+    void removeProduct_whenInvalidProductNumber_return422() throws Exception {
+        // GIVEN
+        ProductEntity product = new ProductEntity(
+                -1L,"Soccer Ball", 10,
+                "The official World Cup 2022 soccer ball", 40
+        );
+
+        // WHEN
+        mockMvc.perform(delete("/api/ecommerce/v1/products/{product}", product.getProductNumber())
+                        .with(csrf())
+                        .with(user("john.last@gmail.com").password("12345678").roles("EMPLOYEE"))
+                )
+                .andExpect(status().isUnprocessableEntity());
+
+        // THEN
+        then(productService).should(never()).removeProduct(anyLong());
+    }
 }

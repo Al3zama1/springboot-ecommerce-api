@@ -43,4 +43,7 @@ public class ProductService {
 
         productRepository.save(product);
     }
+
+    public void removeProduct(Long productNumber) {
+    }
 }
