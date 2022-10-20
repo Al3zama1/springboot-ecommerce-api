@@ -45,5 +45,14 @@ public class ProductService {
     }
 
     public void removeProduct(Long productNumber) {
+        // verify product exists
+        Optional<ProductEntity> product = productRepository.findByProductNumber(productNumber);
+
+        if (product.isEmpty()) {
+            throw new ProductException("Product does not exist");
+        }
+
+        productRepository.delete(product.get());
+
     }
 }

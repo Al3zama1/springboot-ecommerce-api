@@ -5,12 +5,15 @@ import com.example.springbootecommerceapi.exception.ProductException;
 import com.example.springbootecommerceapi.repository.ProductRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -22,6 +25,8 @@ class ProductServiceTest {
 
     @Mock
     private ProductRepository productRepository;
+    @Captor
+    ArgumentCaptor<ProductEntity> productCaptor;
     @InjectMocks
     private ProductService productService;
 
@@ -104,6 +109,47 @@ class ProductServiceTest {
 
         // THEN
         then(productRepository).should(never()).save(any());
+    }
+
+    @Test
+    void removeProduct_whenProductExists_removeIt() {
+        // GIVEN
+        long productNumber = 1L;
+        ProductEntity product = new ProductEntity(
+                productNumber, "Soccer Ball", 10,
+                "The official World Cup 2022 soccer ball", 40
+        );
+
+        // assume that product with given  id does exist
+        given(productRepository.findByProductNumber(productNumber)).willReturn(Optional.of(product));
+
+        // WHEN
+        productService.removeProduct(productNumber);
+
+        // THEN
+        then(productRepository).should().delete(productCaptor.capture());
+        assertThat(productCaptor.getValue().getProductNumber()).isEqualTo(productNumber);
+    }
+
+    @Test
+    void removeProduct_whenProductDoesNotExists_throwProductException() {
+        // GIVEN
+        long productNumber = 1L;
+        ProductEntity product = new ProductEntity(
+                productNumber, "Soccer Ball", 10,
+                "The official World Cup 2022 soccer ball", 40
+        );
+
+        // assume that product with given  id does not exist
+        given(productRepository.findByProductNumber(productNumber)).willReturn(Optional.empty());
+
+        // WHEN
+        assertThatThrownBy(() -> productService.removeProduct(productNumber))
+                .isInstanceOf(ProductException.class)
+                .hasMessage("Product does not exist");
+
+        // THEN
+        then(productRepository).should(never()).delete(any());
     }
 
 }
