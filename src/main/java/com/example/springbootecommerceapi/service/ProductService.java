@@ -25,7 +25,7 @@ public class ProductService {
     }
 
     public ProductEntity getProduct(long productNumber) {
-        Optional<ProductEntity> product = productRepository.findByProductNumber(productNumber);
+        Optional<ProductEntity> product = productRepository.findById(productNumber);
 
         if (product.isEmpty()) {
             throw new ProductException("Product does not exist");
@@ -47,7 +47,7 @@ public class ProductService {
 
     public void removeProduct(Long productNumber) {
         // verify product exists
-        Optional<ProductEntity> product = productRepository.findByProductNumber(productNumber);
+        Optional<ProductEntity> product = productRepository.findById(productNumber);
 
         if (product.isEmpty()) {
             throw new ProductException("Product does not exist");
@@ -59,7 +59,7 @@ public class ProductService {
 
     public void updateProduct(UpdateProduct updateData, long productNumber) {
         // check if product exists
-        Optional<ProductEntity> product = productRepository.findByProductNumber(productNumber);
+        Optional<ProductEntity> product = productRepository.findById(productNumber);
 
         if (product.isEmpty()) {
             throw new ProductException("Product does not exist");

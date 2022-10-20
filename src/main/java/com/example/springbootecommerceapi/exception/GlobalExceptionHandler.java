@@ -1,5 +1,6 @@
 package com.example.springbootecommerceapi.exception;
 
+import com.example.springbootecommerceapi.model.OutOfStockItemDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -52,6 +53,24 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 HttpStatus.BAD_REQUEST,
                 request
         );
+    }
+
+    @ExceptionHandler(ProductOutOfStockException.class)
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public ResponseEntity<Object> handleProductOutOfStock(
+            ProductOutOfStockException exception,
+            WebRequest request
+    ) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.CREATED.value(),
+                "Some or all products wanted are out of stock"
+        );
+
+        for (OutOfStockItemDTO item : exception.getItems()) {
+            errorResponse.addOutOfStock(item.getProductName(), item.getStockQuantity(), item.getQuantityWanted());
+        }
+
+        return  ResponseEntity.accepted().body(errorResponse);
     }
 
     @ExceptionHandler(ProductException.class)

@@ -33,11 +33,10 @@ public class OrderController {
 
     @PostMapping("")
     public ResponseEntity<Void> createOrder(
-            @Valid @RequestBody List<OrderDTO> order,
+            @Valid @RequestBody List<OrderDTO> orderItems,
             @AuthenticationPrincipal(expression = "username") String userEmail
     ) {
-        System.out.println(userEmail);
-        orderService.createOrder(order, userEmail);
+        orderService.createOrder(orderItems, userEmail);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

@@ -52,20 +52,20 @@ class ProductServiceTest {
         );
 
         // assume product with given Id exists
-        given(productRepository.findByProductNumber(productNumber)).willReturn(Optional.of(product));
+        given(productRepository.findById(productNumber)).willReturn(Optional.of(product));
 
         // WHEN
         productService.getProduct(productNumber);
 
         // THEN
-        then(productRepository).should().findByProductNumber(productNumber);
+        then(productRepository).should().findById(productNumber);
     }
 
     @Test
     void getProduct_wheProductDoesNotExists_ProductException() {
         // GIVEN
         long productNumber = 1L;
-        given(productRepository.findByProductNumber(productNumber)).willReturn(Optional.empty());
+        given(productRepository.findById(productNumber)).willReturn(Optional.empty());
 
         // WHEN
         assertThatThrownBy(() -> productService.getProduct(productNumber))
@@ -122,7 +122,7 @@ class ProductServiceTest {
         );
 
         // assume that product with given  id does exist
-        given(productRepository.findByProductNumber(productNumber)).willReturn(Optional.of(product));
+        given(productRepository.findById(productNumber)).willReturn(Optional.of(product));
 
         // WHEN
         productService.removeProduct(productNumber);
@@ -142,7 +142,7 @@ class ProductServiceTest {
         );
 
         // assume that product with given  id does not exist
-        given(productRepository.findByProductNumber(productNumber)).willReturn(Optional.empty());
+        given(productRepository.findById(productNumber)).willReturn(Optional.empty());
 
         // WHEN
         assertThatThrownBy(() -> productService.removeProduct(productNumber))
@@ -164,7 +164,7 @@ class ProductServiceTest {
         UpdateProduct updateProduct = new UpdateProduct("Adidas Ball", 20, 35);
 
         // assume that product with given product number exists
-        given(productRepository.findByProductNumber(productNumber)).willReturn(Optional.of(product));
+        given(productRepository.findById(productNumber)).willReturn(Optional.of(product));
 
         // WHEN
         productService.updateProduct(updateProduct, productNumber);
