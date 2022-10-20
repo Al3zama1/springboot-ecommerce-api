@@ -58,5 +58,19 @@ public class ProductService {
     }
 
     public void updateProduct(UpdateProduct updateData, long productNumber) {
+        // check if product exists
+        Optional<ProductEntity> product = productRepository.findByProductNumber(productNumber);
+
+        if (product.isEmpty()) {
+            throw new ProductException("Product does not exist");
+        }
+
+        // update fields
+        product.get().setProductDescription(updateData.getDescription());
+        product.get().setProductStock(updateData.getQuantity());
+        product.get().setProductPrice(updateData.getPrice());
+
+        // save changes
+        productRepository.save(product.get());
     }
 }

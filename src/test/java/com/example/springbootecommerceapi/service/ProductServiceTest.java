@@ -2,6 +2,7 @@ package com.example.springbootecommerceapi.service;
 
 import com.example.springbootecommerceapi.entity.ProductEntity;
 import com.example.springbootecommerceapi.exception.ProductException;
+import com.example.springbootecommerceapi.model.UpdateProduct;
 import com.example.springbootecommerceapi.repository.ProductRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -150,6 +151,47 @@ class ProductServiceTest {
 
         // THEN
         then(productRepository).should(never()).delete(any());
+    }
+
+    @Test
+    void updateProduct_wheProductExists_updateIt() {
+        // GIVEN
+        long productNumber = 1L;
+        ProductEntity product = new ProductEntity(
+                productNumber, "Soccer Ball", 10,
+                "The official World Cup 2022 soccer ball", 40
+        );
+        UpdateProduct updateProduct = new UpdateProduct("Adidas Ball", 20, 35);
+
+        // assume that product with given product number exists
+        given(productRepository.findByProductNumber(productNumber)).willReturn(Optional.of(product));
+
+        // WHEN
+        productService.updateProduct(updateProduct, productNumber);
+
+        // THEN
+        then(productRepository).should().save(productCaptor.capture());
+
+        product.setProductDescription(updateProduct.getDescription());
+        product.setProductPrice(updateProduct.getPrice());
+        product.setProductStock(updateProduct.getQuantity());
+
+        assertThat(productCaptor.getValue()).isEqualTo(product);
+    }
+
+    @Test
+    void updateProduct_wheProductDoesNotExists_throwProductException() {
+        // GIVEN
+        long productNumber = 1L;
+        UpdateProduct updateProduct = new UpdateProduct("Adidas Ball", 20, 35);
+
+        // WHEN
+        assertThatThrownBy(() -> productService.updateProduct(updateProduct, productNumber))
+                .isInstanceOf(ProductException.class)
+                .hasMessage("Product does not exist");
+
+        // THEN
+        then(productRepository).should(never()).save(any());
     }
 
 }
