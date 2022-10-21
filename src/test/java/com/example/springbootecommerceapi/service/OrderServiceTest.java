@@ -19,7 +19,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -182,7 +181,7 @@ class OrderServiceTest {
         given(userRepository.findByEmail(email)).willReturn(Optional.of(customer));
 
         // WHEN
-        orderService.getAllOrders(email);
+        orderService.getAllOrdersFromCustomer(email);
 
         // THEN
         then(orderRepository).should().findByCustomer(customer);
@@ -198,13 +197,56 @@ class OrderServiceTest {
         given(userRepository.findByEmail(email)).willReturn(Optional.empty());
 
         // WHEN
-        assertThatThrownBy(() -> orderService.getAllOrders(email))
+        assertThatThrownBy(() -> orderService.getAllOrdersFromCustomer(email))
                 .isInstanceOf(UserException.class)
                         .hasMessage("User does not exist");
 
 
         // THEN
         then(orderRepository).should(never()).findByCustomer(any());
+    }
+
+    @Test
+    void getOrderItems_whenOrderExistsAndBelongsToCustomer_returnOrderItems() {
+        // GIVEN
+        String email = "john.last@gmail.com";
+        long orderNumber = 1L;
+
+        ProductEntity product = new ProductEntity(
+                1L, "Soccer Ball", 10,
+                "The official World Cup 2022 soccer ball", 40
+        );
+        UserEntity customer = new UserBuilder()
+                .firstName("John")
+                .lastName("Last")
+                .gender(Gender.MALE)
+                .phone("(323) 456-1234")
+                .email(email)
+                .password("12345678")
+                .street("5678 S 88Th St")
+                .city("Los Angeles")
+                .state("California")
+                .zipCode("90002")
+                .build();
+        customer.setActive(true);
+        customer.setRole(Role.CUSTOMER);
+        customer.setUserNumber(1L);
+
+        // create order
+        OrderEntity orderEntity = new OrderEntity(customer);
+
+        // generate order item associated with above order
+        OrderItemPK orderItemPK = new OrderItemPK(product, orderEntity);
+        OrderItemEntity orderItemEntity = new OrderItemEntity(orderItemPK, 30, 3);
+
+        given(orderItemRepository.getOrderItemsFromOrder(orderNumber, email)).willReturn(List.of(orderItemEntity));
+
+        // WHEN
+        orderService.getOrderItems(orderNumber, email);
+
+        // THEN
+        then(orderItemRepository).should().getOrderItemsFromOrder(orderNumber, email);
+
     }
 
 

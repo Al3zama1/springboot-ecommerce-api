@@ -1,11 +1,11 @@
 package com.example.springbootecommerceapi.service;
 
 import com.example.springbootecommerceapi.entity.*;
-import com.example.springbootecommerceapi.exception.ProductException;
 import com.example.springbootecommerceapi.exception.ProductOutOfStockException;
 import com.example.springbootecommerceapi.exception.UserException;
 import com.example.springbootecommerceapi.model.OrderDTO;
 import com.example.springbootecommerceapi.model.OutOfStockItemDTO;
+import com.example.springbootecommerceapi.repository.OrderItemRepository;
 import com.example.springbootecommerceapi.repository.OrderRepository;
 import com.example.springbootecommerceapi.repository.ProductRepository;
 import com.example.springbootecommerceapi.repository.UserRepository;
@@ -20,18 +20,21 @@ public class OrderService {
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
     private final OrderItemService orderItemService;
+    private final OrderItemRepository orderItemRepository;
 
     @Autowired
     public OrderService(
             ProductRepository productRepository,
             UserRepository userRepository,
             OrderRepository orderRepository,
-            OrderItemService orderItemService
+            OrderItemService orderItemService,
+            OrderItemRepository orderItemRepository
     ) {
         this.productRepository = productRepository;
         this.userRepository = userRepository;
         this.orderRepository = orderRepository;
         this.orderItemService = orderItemService;
+        this.orderItemRepository = orderItemRepository;
     }
 
 
@@ -89,7 +92,7 @@ public class OrderService {
         orderItemService.saveItems(savedOrder, products, productAndQuantity);
     }
 
-    public List<OrderEntity> getAllOrders(String userEmail) {
+    public List<OrderEntity> getAllOrdersFromCustomer(String userEmail) {
         // get customer
         Optional<UserEntity> customer = userRepository.findByEmail(userEmail);
 
@@ -98,5 +101,10 @@ public class OrderService {
         }
 
         return orderRepository.findByCustomer(customer.get());
+    }
+
+    public List<OrderItemEntity> getOrderItems(long orderNumber, String username) {
+        List<OrderItemEntity> orderItems = orderItemRepository.getOrderItemsFromOrder(orderNumber, username);
+        return orderItems;
     }
 }

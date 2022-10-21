@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 @Entity
@@ -121,7 +122,7 @@ public class OrderEntity {
         return "OrderEntity{" +
                 "orderNumber=" + orderNumber +
                 ", customer=" + customer +
-                ", datePlaced=" + datePlaced +
+                ", datePlaced=" + datePlaced.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")) +
                 ", dateShipped=" + dateShipped +
                 ", status=" + status +
                 '}';

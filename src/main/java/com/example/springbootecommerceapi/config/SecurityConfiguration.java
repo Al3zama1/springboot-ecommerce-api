@@ -98,6 +98,20 @@ public class SecurityConfiguration {
                 .build();
         customer.setActive(true);
         customer.setRole(Role.CUSTOMER);
+        UserEntity customer2 = new UserBuilder()
+                .firstName("customer2")
+                .lastName("Last")
+                .gender(Gender.MALE)
+                .phone("(323) 456-1234")
+                .email("customer2@gmail.com")
+                .password(passwordEncoder.encode("12345678"))
+                .street("5678 S 88Th St")
+                .city("Los Angeles")
+                .state("California")
+                .zipCode("90002")
+                .build();
+        customer2.setActive(true);
+        customer2.setRole(Role.CUSTOMER);
         UserEntity admin = new UserBuilder()
                 .firstName("admin")
                 .lastName("Last")
@@ -115,7 +129,7 @@ public class SecurityConfiguration {
 
         ProductEntity product = new ProductEntity("ball", 20, "soccer ball", 30);
         return  args -> {
-            userRepository.saveAll(List.of(customer, admin, employee));
+            userRepository.saveAll(List.of(customer,customer2, admin, employee));
             productRepository.save(product);
         };
     }

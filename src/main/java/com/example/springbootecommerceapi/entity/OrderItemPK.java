@@ -1,6 +1,7 @@
 package com.example.springbootecommerceapi.entity;
 
 import javax.persistence.Embeddable;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import java.io.Serializable;
@@ -15,7 +16,9 @@ public class OrderItemPK implements Serializable {
             referencedColumnName = "productNumber"
     )
     private ProductEntity productEntity;
-    @OneToOne
+    @OneToOne(
+            fetch = FetchType.LAZY
+    )
     @JoinColumn(
             name = "orderNumber",
             referencedColumnName = "orderNumber"
