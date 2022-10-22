@@ -48,6 +48,11 @@ public class OrderEntity {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
     private LocalDateTime dateShipped;
     @Column(
+            name = "dateDelivered"
+    )
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
+    private LocalDateTime dateDelivered;
+    @Column(
             nullable = false
     )
     @Enumerated(
@@ -92,6 +97,14 @@ public class OrderEntity {
         return dateShipped;
     }
 
+    public LocalDateTime getDateDelivered() {
+        return dateDelivered;
+    }
+
+    public void setDateDelivered(LocalDateTime dateDelivered) {
+        this.dateDelivered = dateDelivered;
+    }
+
     public void setDateShipped(LocalDateTime dateShipped) {
         this.dateShipped = dateShipped;
     }
@@ -104,17 +117,18 @@ public class OrderEntity {
         this.status = status;
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         OrderEntity that = (OrderEntity) o;
-        return Objects.equals(orderNumber, that.orderNumber) && Objects.equals(customer, that.customer) && Objects.equals(datePlaced, that.datePlaced) && Objects.equals(dateShipped, that.dateShipped) && status == that.status;
+        return Objects.equals(orderNumber, that.orderNumber) && Objects.equals(customer, that.customer) && Objects.equals(datePlaced, that.datePlaced) && Objects.equals(dateShipped, that.dateShipped) && Objects.equals(dateDelivered, that.dateDelivered) && status == that.status;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(orderNumber, customer, datePlaced, dateShipped, status);
+        return Objects.hash(orderNumber, customer, datePlaced, dateShipped, dateDelivered, status);
     }
 
     @Override
@@ -124,6 +138,7 @@ public class OrderEntity {
                 ", customer=" + customer +
                 ", datePlaced=" + datePlaced.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")) +
                 ", dateShipped=" + dateShipped +
+                ", dateDelivered=" + dateDelivered +
                 ", status=" + status +
                 '}';
     }

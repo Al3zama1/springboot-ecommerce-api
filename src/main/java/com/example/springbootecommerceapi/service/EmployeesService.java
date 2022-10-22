@@ -7,6 +7,7 @@ import com.example.springbootecommerceapi.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -27,6 +28,7 @@ public class EmployeesService {
         }
 
         order.get().setStatus(OrderStatus.SHIPPED);
+        order.get().setDateShipped(LocalDateTime.now());
 
         orderRepository.save(order.get());
     }
@@ -39,6 +41,8 @@ public class EmployeesService {
         }
 
         order.get().setStatus(OrderStatus.DELIVERED);
+        order.get().setDateShipped(LocalDateTime.now());
+
         orderRepository.save(order.get());
     }
 }
