@@ -15,6 +15,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -35,6 +36,8 @@ class AdminServiceTest {
 
     @Mock
     private EmployeeRegistrationRepository employeeRegistrationRepository;
+    @Mock
+    ApplicationEventPublisher publisher;
     @InjectMocks
     private AdminService adminService;
     @Captor

@@ -101,6 +101,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         );
     }
 
+    @ExceptionHandler(EmployeeRegistrationTokenException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<Object> handleEmployeeRegistrationTokenException(
+            EmployeeRegistrationTokenException exception,
+            WebRequest request
+    ) {
+        return buildErrorResponse(
+                exception,
+                exception.getMessage(),
+                HttpStatus.BAD_REQUEST,
+                request
+        );
+    }
+
 
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)

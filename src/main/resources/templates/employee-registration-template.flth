@@ -1,0 +1,11 @@
+<html>
+<head></head>
+<body>
+    <p>Dear Future Employee my name is ${adminFirstName} ${adminLastName} and I am an admin at the company.</p>
+    <p>I am pleased to inform you that we have selected you to be part of our growing team. Please go ahead an create
+    an account on the website. You must provide the access token provide below to create an account.</p>
+    <p>${token}</p>
+    <p>Thanks</p>
+
+</body>
+</html>

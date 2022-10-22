@@ -2,19 +2,18 @@ package com.example.springbootecommerceapi.service;
 
 
 import com.example.springbootecommerceapi.entity.ActivationTokenEntity;
+import com.example.springbootecommerceapi.entity.EmployeeRegistrationToken;
 import com.example.springbootecommerceapi.entity.PasswordTokenEntity;
 import com.example.springbootecommerceapi.entity.UserEntity;
 import com.example.springbootecommerceapi.event.ChangePasswordEvent;
 import com.example.springbootecommerceapi.event.UserRegistrationEvent;
-import com.example.springbootecommerceapi.exception.AccountActivationException;
-import com.example.springbootecommerceapi.exception.PasswordException;
-import com.example.springbootecommerceapi.exception.PasswordTokenException;
-import com.example.springbootecommerceapi.exception.UserException;
+import com.example.springbootecommerceapi.exception.*;
 import com.example.springbootecommerceapi.model.ForgottenPassword;
 import com.example.springbootecommerceapi.model.KnownPassword;
 import com.example.springbootecommerceapi.model.EmailDTO;
 import com.example.springbootecommerceapi.model.Role;
 import com.example.springbootecommerceapi.repository.ActivationTokenRepository;
+import com.example.springbootecommerceapi.repository.EmployeeRegistrationRepository;
 import com.example.springbootecommerceapi.repository.PasswordTokenRepository;
 import com.example.springbootecommerceapi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +34,7 @@ public class AuthenticationService {
     private final HttpServletRequest request;
     private final PasswordEncoder passwordEncoder;
     private final PasswordTokenRepository passwordTokenRepository;
+    private final EmployeeRegistrationRepository employeeRegistrationRepository;
 
     @Autowired
     public AuthenticationService(
@@ -43,7 +43,9 @@ public class AuthenticationService {
             ApplicationEventPublisher publisher,
             HttpServletRequest request,
             PasswordEncoder passwordEncoder,
-            PasswordTokenRepository passwordTokenRepository
+            PasswordTokenRepository passwordTokenRepository,
+            EmployeeRegistrationRepository employeeRegistrationRepository
+
     ) {
         this.userRepository = userRepository;
         this.activationTokenRepository = activationTokenRepository;
@@ -51,6 +53,7 @@ public class AuthenticationService {
         this.request = request;
         this.passwordEncoder = passwordEncoder;
         this.passwordTokenRepository = passwordTokenRepository;
+        this.employeeRegistrationRepository = employeeRegistrationRepository;
     }
 
 
@@ -79,15 +82,39 @@ public class AuthenticationService {
 
     }
 
-    private String applicationUrl(String token, String path) {
-        return "http://" + request.getServerName() + ":" +
-                request.getServerPort() +
-                "/api/ecommerce/v1/authentication" +
-                "/" + path + "?token=" + token;
-    }
+    public void registerEmployee(UserEntity user, String token) {
+        Optional<EmployeeRegistrationToken> registrationToken =
+                employeeRegistrationRepository.findByToken(token);
 
-    public void RegisterEmployee(UserEntity employee) {
-        employee.setRole(Role.EMPLOYEE);
+        if (registrationToken.isEmpty()) {
+            throw new EmployeeRegistrationTokenException("Invalid employee registration token.");
+        }
+
+        // check the email of the employee matches to the registration token employee email
+        if (!user.getEmail().equals(registrationToken.get().getEmployeeEmail())) {
+            throw new EmployeeRegistrationTokenException("Invalid employee registration token.");
+        }
+
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new UserException("A user with given email already exists. " +
+                    "Contact admin to get a token for a different email.");
+        }
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRole(Role.EMPLOYEE);
+
+        // save new employee
+        UserEntity savedUser = userRepository.save(user);
+        employeeRegistrationRepository.delete(registrationToken.get());
+
+        // generate account activation token
+        String accountActivationToken = UUID.randomUUID().toString();
+        ActivationTokenEntity activationToken = new ActivationTokenEntity(savedUser, accountActivationToken);
+        activationTokenRepository.save(activationToken);
+
+        // send account activation link
+        String url = applicationUrl(accountActivationToken, "activate-account");
+        publisher.publishEvent(new UserRegistrationEvent(user, url));
     }
 
     public void activateAccount(String token) {
@@ -163,6 +190,11 @@ public class AuthenticationService {
         passwordTokenRepository.delete(passwordToken.get());
     }
 
-    public void registerEmployee(UserEntity user, String token) {
+    private String applicationUrl(String token, String path) {
+        return "http://" + request.getServerName() + ":" +
+                request.getServerPort() +
+                "/api/ecommerce/v1/authentication" +
+                "/" + path + "?token=" + token;
     }
+
 }

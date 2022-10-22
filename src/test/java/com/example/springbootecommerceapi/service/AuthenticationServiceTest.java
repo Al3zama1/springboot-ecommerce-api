@@ -1,14 +1,13 @@
 package com.example.springbootecommerceapi.service;
 
 import com.example.springbootecommerceapi.entity.ActivationTokenEntity;
+import com.example.springbootecommerceapi.entity.EmployeeRegistrationToken;
 import com.example.springbootecommerceapi.entity.PasswordTokenEntity;
 import com.example.springbootecommerceapi.entity.UserEntity;
-import com.example.springbootecommerceapi.exception.AccountActivationException;
-import com.example.springbootecommerceapi.exception.PasswordException;
-import com.example.springbootecommerceapi.exception.PasswordTokenException;
-import com.example.springbootecommerceapi.exception.UserException;
+import com.example.springbootecommerceapi.exception.*;
 import com.example.springbootecommerceapi.model.*;
 import com.example.springbootecommerceapi.repository.ActivationTokenRepository;
+import com.example.springbootecommerceapi.repository.EmployeeRegistrationRepository;
 import com.example.springbootecommerceapi.repository.PasswordTokenRepository;
 import com.example.springbootecommerceapi.repository.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -43,6 +42,8 @@ class AuthenticationServiceTest {
     private HttpServletRequest request;
     @Mock
     private ApplicationEventPublisher publisher;
+    @Mock
+    private EmployeeRegistrationRepository employeeRegistrationRepository;
     @Mock
     private PasswordEncoder passwordEncoder;
     @Mock
@@ -109,6 +110,194 @@ class AuthenticationServiceTest {
         assertThatThrownBy(() -> authenticationService.registerCustomer(customer))
                 .isInstanceOf(UserException.class)
                 .hasMessage("User with given email exists");
+
+        // THEN
+        then(userRepository).should(never()).save(any());
+    }
+
+    @Test
+    void registerEmployee() {
+        // GIVEN
+        String token = UUID.randomUUID().toString();
+        UserEntity employee = new UserBuilder()
+                .firstName("John")
+                .lastName("Last")
+                .gender(Gender.MALE)
+                .phone("(323) 456-1234")
+                .email("employee@gmail.com")
+                .password("12345678")
+                .street("5678 S 88Th St")
+                .city("Los Angeles")
+                .state("California")
+                .zipCode("90002")
+                .build();
+        employee.setRole(Role.EMPLOYEE);
+
+        UserEntity admin = new UserBuilder()
+                .firstName("John")
+                .lastName("Last")
+                .gender(Gender.MALE)
+                .phone("(323) 456-1234")
+                .email("admin@gmail.com")
+                .password("12345678")
+                .street("5678 S 88Th St")
+                .city("Los Angeles")
+                .state("California")
+                .zipCode("90002")
+                .build();
+        admin.setActive(true);
+        admin.setUserNumber(1L);
+        admin.setRole(Role.ADMIN);
+
+        EmployeeRegistrationToken registrationToken =
+                new EmployeeRegistrationToken(admin, token, employee.getEmail());
+
+
+        given(employeeRegistrationRepository.findByToken(token))
+                .willReturn(Optional.of(registrationToken));
+
+
+        // WHEN
+        authenticationService.registerEmployee(employee, token);
+
+        // THEN
+        then(userRepository).should().save(employee);
+        then(employeeRegistrationRepository).should().delete(registrationToken);
+    }
+
+    @Test
+    void registerEmployee_whenEmployeeEmailIsTaken_throwUserException() {
+        // GIVEN
+        String token = UUID.randomUUID().toString();
+        UserEntity employee = new UserBuilder()
+                .firstName("John")
+                .lastName("Last")
+                .gender(Gender.MALE)
+                .phone("(323) 456-1234")
+                .email("employee@gmail.com")
+                .password("12345678")
+                .street("5678 S 88Th St")
+                .city("Los Angeles")
+                .state("California")
+                .zipCode("90002")
+                .build();
+        employee.setRole(Role.EMPLOYEE);
+
+        UserEntity admin = new UserBuilder()
+                .firstName("John")
+                .lastName("Last")
+                .gender(Gender.MALE)
+                .phone("(323) 456-1234")
+                .email("admin@gmail.com")
+                .password("12345678")
+                .street("5678 S 88Th St")
+                .city("Los Angeles")
+                .state("California")
+                .zipCode("90002")
+                .build();
+        admin.setActive(true);
+        admin.setUserNumber(1L);
+        admin.setRole(Role.ADMIN);
+
+        EmployeeRegistrationToken registrationToken =
+                new EmployeeRegistrationToken(admin, token, employee.getEmail());
+
+
+        given(employeeRegistrationRepository.findByToken(token))
+                .willReturn(Optional.of(registrationToken));
+
+        given(userRepository.existsByEmail(employee.getEmail())).willReturn(true);
+
+
+        // WHEN
+        assertThatThrownBy(() -> authenticationService.registerEmployee(employee, token))
+                .isInstanceOf(UserException.class)
+                        .hasMessage("A user with given email already exists. " +
+                                "Contact admin to get a token for a different email.");
+
+        // THEN
+        then(userRepository).should(never()).save(any());
+        then(employeeRegistrationRepository).should(never()).delete(any());
+    }
+
+    @Test
+    void registerEmployee_whenEmployeeEmailInTokenDoesNotMatchEmployeeEmail_throwEmployeeTokenException() {
+        // GIVEN
+        String token = UUID.randomUUID().toString();
+        UserEntity employee = new UserBuilder()
+                .firstName("John")
+                .lastName("Last")
+                .gender(Gender.MALE)
+                .phone("(323) 456-1234")
+                .email("employee@gmail.com")
+                .password("12345678")
+                .street("5678 S 88Th St")
+                .city("Los Angeles")
+                .state("California")
+                .zipCode("90002")
+                .build();
+        employee.setRole(Role.EMPLOYEE);
+
+        UserEntity admin = new UserBuilder()
+                .firstName("John")
+                .lastName("Last")
+                .gender(Gender.MALE)
+                .phone("(323) 456-1234")
+                .email("admin@gmail.com")
+                .password("12345678")
+                .street("5678 S 88Th St")
+                .city("Los Angeles")
+                .state("California")
+                .zipCode("90002")
+                .build();
+        admin.setActive(true);
+        admin.setUserNumber(1L);
+        admin.setRole(Role.ADMIN);
+
+        EmployeeRegistrationToken registrationToken =
+                new EmployeeRegistrationToken(admin, token, "someone@gmail.com");
+
+
+        given(employeeRegistrationRepository.findByToken(token))
+                .willReturn(Optional.of(registrationToken));
+
+
+        // WHEN
+        assertThatThrownBy(() -> authenticationService.registerEmployee(employee, token))
+                .isInstanceOf(EmployeeRegistrationTokenException.class)
+                        .hasMessage("Invalid employee registration token.");
+
+        // THEN
+        then(userRepository).should(never()).save(any());
+        then(employeeRegistrationRepository).should(never()).delete(any());
+    }
+
+    @Test
+    void registerEmployee_whenTokenDoesNotExist_throwEmployeeTokenException() {
+        // GIVEN
+        String token = UUID.randomUUID().toString();
+        UserEntity employee = new UserBuilder()
+                .firstName("John")
+                .lastName("Last")
+                .gender(Gender.MALE)
+                .phone("(323) 456-1234")
+                .email("employee@gmail.com")
+                .password("12345678")
+                .street("5678 S 88Th St")
+                .city("Los Angeles")
+                .state("California")
+                .zipCode("90002")
+                .build();
+        employee.setRole(Role.EMPLOYEE);
+
+        given(employeeRegistrationRepository.findByToken(token))
+                .willReturn(Optional.empty());
+
+
+        // WHEN
+        assertThatThrownBy(() -> authenticationService.registerEmployee(employee, token))
+                .isInstanceOf(EmployeeRegistrationTokenException.class)
+                        .hasMessage("Invalid employee registration token.");
 
         // THEN
         then(userRepository).should(never()).save(any());
