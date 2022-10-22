@@ -42,14 +42,14 @@ class OrderControllerTest {
     @MockBean
     private UserRepository userRepository;
     @MockBean
-    ProductRepository productRepository;
+    private ProductRepository productRepository;
     @MockBean
     private OrderService orderService;
 
     @Autowired
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
     @Autowired
-    MockMvc mockMvc;
+    private MockMvc mockMvc;
 
 
 

@@ -50,6 +50,7 @@ public class SecurityConfiguration {
 //                .antMatchers(HttpMethod.DELETE, "/api/ecommerce/v1/products/**").hasAnyRole("EMPLOYEE, ADMIN")
                 .antMatchers("/api/ecommerce/v1/orders/**").hasRole("CUSTOMER")
                 .antMatchers("/api/ecommerce/v1/employees/**").hasAnyRole("EMPLOYEE", "ADMIN")
+                .antMatchers("/api/ecommerce/v1/admins/**").hasAnyRole("ADMIN")
                 .anyRequest().authenticated()
                 .and()
                 .userDetailsService(jpaUserDetailsService)

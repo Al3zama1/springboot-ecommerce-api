@@ -52,7 +52,7 @@ class AuthenticationServiceTest {
     private AuthenticationService authenticationService;
 
     @Captor
-    ArgumentCaptor<UserEntity> userCaptor;
+    private ArgumentCaptor<UserEntity> userCaptor;
 
 
     @Test

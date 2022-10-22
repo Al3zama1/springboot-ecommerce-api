@@ -50,7 +50,7 @@ class ProductControllerTest {
     @MockBean
     private UserRepository userRepository;
     @MockBean
-    ProductRepository productRepository;
+    private ProductRepository productRepository;
 
 
     @Test

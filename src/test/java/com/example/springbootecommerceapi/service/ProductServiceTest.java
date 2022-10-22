@@ -27,7 +27,7 @@ class ProductServiceTest {
     @Mock
     private ProductRepository productRepository;
     @Captor
-    ArgumentCaptor<ProductEntity> productCaptor;
+    private ArgumentCaptor<ProductEntity> productCaptor;
     @InjectMocks
     private ProductService productService;
 

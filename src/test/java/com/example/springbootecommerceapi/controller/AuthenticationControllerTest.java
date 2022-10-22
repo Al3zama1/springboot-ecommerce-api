@@ -32,15 +32,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class AuthenticationControllerTest {
 
     @Autowired
-    MockMvc mockMvc;
+    private MockMvc mockMvc;
     @Autowired
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
     @MockBean
-    AuthenticationService authenticationService;
+    private AuthenticationService authenticationService;
     @MockBean
-    UserRepository userRepository;
+    private UserRepository userRepository;
     @MockBean
-    ProductRepository productRepository;
+    private ProductRepository productRepository;
 
     @Test
     void registerCustomer_whenValidData_return201() throws Exception {

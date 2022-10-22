@@ -34,7 +34,8 @@ public class ActivationTokenEntity {
     private UserEntity userEntity;
 
     @Column(
-            unique = true
+            unique = true,
+            nullable = false
     )
     private String token;
 

@@ -36,7 +36,7 @@ class EmployeesServiceTest {
     @InjectMocks
     private EmployeesService employeesService;
     @Captor
-    ArgumentCaptor<OrderEntity> orderCaptor;
+    private ArgumentCaptor<OrderEntity> orderCaptor;
 
     @Test
     void shipOrder_whenOrderExists_setStatusToShipped() {

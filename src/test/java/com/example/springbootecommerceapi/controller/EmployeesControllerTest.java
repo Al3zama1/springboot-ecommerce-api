@@ -27,15 +27,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class EmployeesControllerTest {
 
     @Autowired
-    MockMvc mockMvc;
+    private MockMvc mockMvc;
     @Autowired
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
     @MockBean
-    ProductRepository productRepository;
+    private ProductRepository productRepository;
     @MockBean
-    UserRepository userRepository;
+    private UserRepository userRepository;
     @MockBean
-    EmployeesService employeesService;
+    private EmployeesService employeesService;
 
     @Test
     void shipOrder_whenOrderNumberIsValid_return204() throws Exception {
