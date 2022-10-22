@@ -8,6 +8,6 @@ import java.util.Map;
 
 public interface EmailSenderService {
 
-    void sendEmail(Email email);
-    String getContentFromTemplate(Map<String, Object> model);
+    void sendEmail(Email email, String template);
+    String getContentFromTemplate(Map<String, Object> model, String template);
 }

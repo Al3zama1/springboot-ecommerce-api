@@ -2,6 +2,7 @@ package com.example.springbootecommerceapi.service;
 
 import com.example.springbootecommerceapi.model.Email;
 import freemarker.template.Configuration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -12,18 +13,19 @@ import javax.mail.internet.MimeMessage;
 import java.util.Map;
 
 @Service
-public class PasswordResetEmailService implements EmailSenderService{
+public class HtmlEmailSenderService implements EmailSenderService{
 
     private final JavaMailSender mailSender;
     private final Configuration fmConfiguration;
 
-    public PasswordResetEmailService(JavaMailSender mailSender, Configuration fmConfiguration) {
+    @Autowired
+    public HtmlEmailSenderService(JavaMailSender mailSender, Configuration fmConfiguration) {
         this.mailSender = mailSender;
         this.fmConfiguration = fmConfiguration;
     }
 
     @Override
-    public void sendEmail(Email email) {
+    public void sendEmail(Email email, String template) {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
 
         try {
@@ -33,7 +35,7 @@ public class PasswordResetEmailService implements EmailSenderService{
             mimeMessageHelper.setFrom(email.getFrom());
             mimeMessageHelper.setTo(email.getTo());
 
-            email.setContent(getContentFromTemplate(email.getModel()));
+            email.setContent(getContentFromTemplate(email.getModel(), template));
             mimeMessageHelper.setText(email.getContent(), true);
 
             mailSender.send(mimeMessageHelper.getMimeMessage());
@@ -43,15 +45,16 @@ public class PasswordResetEmailService implements EmailSenderService{
     }
 
     @Override
-    public String getContentFromTemplate(Map<String, Object> model) {
+    public String getContentFromTemplate(Map<String, Object> model, String template) {
         StringBuffer content = new StringBuffer();
 
         try {
             content.append(FreeMarkerTemplateUtils.processTemplateIntoString(
-                    fmConfiguration.getTemplate("password-reset-template.flth"), model));
+                    fmConfiguration.getTemplate(template + ".flth"), model));
         } catch (Exception e) {
             throw new RuntimeException("Something went Wrong");
         }
         return  content.toString();
     }
+
 }

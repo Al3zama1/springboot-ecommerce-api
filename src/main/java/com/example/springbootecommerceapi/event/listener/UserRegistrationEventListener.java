@@ -3,8 +3,8 @@ package com.example.springbootecommerceapi.event.listener;
 import com.example.springbootecommerceapi.entity.UserEntity;
 import com.example.springbootecommerceapi.event.UserRegistrationEvent;
 import com.example.springbootecommerceapi.model.Email;
-import com.example.springbootecommerceapi.service.AccountActivationEmailService;
 import com.example.springbootecommerceapi.service.EmailSenderService;
+import com.example.springbootecommerceapi.service.HtmlEmailSenderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.scheduling.annotation.Async;
@@ -16,7 +16,7 @@ public class UserRegistrationEventListener implements ApplicationListener<UserRe
     private final EmailSenderService emailSenderService;
 
     @Autowired
-    public UserRegistrationEventListener(AccountActivationEmailService emailSenderService) {
+    public UserRegistrationEventListener(HtmlEmailSenderService emailSenderService) {
         this.emailSenderService = emailSenderService;
     }
 
@@ -30,6 +30,6 @@ public class UserRegistrationEventListener implements ApplicationListener<UserRe
         email.getModel().put("activationUrl", url);
         email.getModel().put("firstName",user.getFirstName());
         email.getModel().put("lastName", user.getLastName());
-        emailSenderService.sendEmail(email);
+        emailSenderService.sendEmail(email, "activate-account-template");
     }
 }

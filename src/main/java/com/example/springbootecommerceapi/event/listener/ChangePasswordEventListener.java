@@ -4,7 +4,7 @@ import com.example.springbootecommerceapi.entity.UserEntity;
 import com.example.springbootecommerceapi.event.ChangePasswordEvent;
 import com.example.springbootecommerceapi.model.Email;
 import com.example.springbootecommerceapi.service.EmailSenderService;
-import com.example.springbootecommerceapi.service.PasswordResetEmailService;
+import com.example.springbootecommerceapi.service.HtmlEmailSenderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.scheduling.annotation.Async;
@@ -16,8 +16,8 @@ public class ChangePasswordEventListener implements ApplicationListener<ChangePa
     private final EmailSenderService emailSenderService;
 
     @Autowired
-    public ChangePasswordEventListener(PasswordResetEmailService passwordResetEmailService) {
-        this.emailSenderService = passwordResetEmailService;
+    public ChangePasswordEventListener(HtmlEmailSenderService emailSenderService) {
+        this.emailSenderService = emailSenderService;
     }
 
     @Async
@@ -30,7 +30,7 @@ public class ChangePasswordEventListener implements ApplicationListener<ChangePa
         email.getModel().put("passwordResetUrl", url);
         email.getModel().put("firstName",user.getFirstName());
         email.getModel().put("lastName", user.getLastName());
-        emailSenderService.sendEmail(email);
+        emailSenderService.sendEmail(email, "password-reset-template");
 
     }
 }
