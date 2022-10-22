@@ -52,4 +52,15 @@ public class OrderController {
         List<OrderItemEntity> orderItemEntities = orderService.getOrderItems(orderNumber, userEmail);
         return ResponseEntity.ok(orderItemEntities);
     }
+
+    @PatchMapping("/{orderNumber}/cancel")
+    public ResponseEntity<Void> cancelOrder(
+            @Positive @PathVariable long orderNumber,
+            @AuthenticationPrincipal(expression = "username") String userEmail
+    ) {
+        orderService.cancelCustomerOrder(orderNumber, userEmail);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+
 }

@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -30,8 +31,7 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
@@ -194,6 +194,40 @@ class OrderControllerTest {
 
         // THEN
         then(orderService).should(never()).getOrderItems(anyLong(), anyString());
+    }
+
+    @Test
+    void cancelOrder_whenValidOrderNumber_return204() throws Exception {
+        // GIVEN
+        long orderNumber = 1L;
+        String email = "john.last@gmail.com";
+
+        // WHEN
+        mockMvc.perform(patch("/api/ecommerce/v1/orders/{orderNumber}/cancel", orderNumber)
+                .with(csrf())
+                .with(user(email).password("12345678").roles("CUSTOMER")))
+                .andExpect(status().is(HttpStatus.NO_CONTENT.value()));
+
+        // THEN
+        then(orderService).should().cancelCustomerOrder(orderNumber, email);
+
+    }
+
+    @Test
+    void cancelOrder_whenInvalidOrderNumber_return422() throws Exception {
+        // GIVEN
+        long orderNumber = -1L;
+        String email = "john.last@gmail.com";
+
+        // WHEN
+        mockMvc.perform(patch("/api/ecommerce/v1/orders/{orderNumber}/cancel", orderNumber)
+                        .with(csrf())
+                        .with(user(email).password("12345678").roles("CUSTOMER")))
+                .andExpect(status().isUnprocessableEntity());
+
+        // THEN
+        then(orderService).should(never()).cancelCustomerOrder(anyLong(), anyString());
+
     }
 
 }

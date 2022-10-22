@@ -1,12 +1,10 @@
 package com.example.springbootecommerceapi.service;
 
 import com.example.springbootecommerceapi.entity.*;
+import com.example.springbootecommerceapi.exception.OrderException;
 import com.example.springbootecommerceapi.exception.ProductOutOfStockException;
 import com.example.springbootecommerceapi.exception.UserException;
-import com.example.springbootecommerceapi.model.Gender;
-import com.example.springbootecommerceapi.model.OrderDTO;
-import com.example.springbootecommerceapi.model.Role;
-import com.example.springbootecommerceapi.model.UserBuilder;
+import com.example.springbootecommerceapi.model.*;
 import com.example.springbootecommerceapi.repository.OrderItemRepository;
 import com.example.springbootecommerceapi.repository.OrderRepository;
 import com.example.springbootecommerceapi.repository.ProductRepository;
@@ -248,6 +246,98 @@ class OrderServiceTest {
         then(orderItemRepository).should().getOrderItemsFromOrder(orderNumber, email);
 
     }
+
+    @Test
+    void cancelCustomerOrder_whenOrderBelongsToCustomerAndIsProcessing_cancelIt() {
+        // GIVEN
+        long orderNumber = 1L;
+        String email = "john.last@gmail.com";
+        UserEntity customer = new UserBuilder()
+                .firstName("John")
+                .lastName("Last")
+                .gender(Gender.MALE)
+                .phone("(323) 456-1234")
+                .email(email)
+                .password("12345678")
+                .street("5678 S 88Th St")
+                .city("Los Angeles")
+                .state("California")
+                .zipCode("90002")
+                .build();
+        customer.setRole(Role.CUSTOMER);
+        customer.setActive(true);
+        customer.setUserNumber(1L);
+
+        OrderEntity order = new OrderEntity(customer);
+
+        // assume that order belongs to customer and status is processing
+        given(orderRepository.findByOrderNumberAndCustomerEmail(orderNumber, email))
+                .willReturn(Optional.of(order));
+
+        // WHEN
+        orderService.cancelCustomerOrder(orderNumber, email);
+
+        // THEN
+        then(orderRepository).should().save(order);
+    }
+
+    @Test
+    void cancelCustomerOrder_whenOrderBelongsToCustomerAndHasShippedOrDelivered_throwOrderException() {
+        // GIVEN
+        long orderNumber = 1L;
+        String email = "john.last@gmail.com";
+        UserEntity customer = new UserBuilder()
+                .firstName("John")
+                .lastName("Last")
+                .gender(Gender.MALE)
+                .phone("(323) 456-1234")
+                .email(email)
+                .password("12345678")
+                .street("5678 S 88Th St")
+                .city("Los Angeles")
+                .state("California")
+                .zipCode("90002")
+                .build();
+        customer.setRole(Role.CUSTOMER);
+        customer.setActive(true);
+        customer.setUserNumber(1L);
+
+        OrderEntity order = new OrderEntity(customer);
+        order.setStatus(OrderStatus.SHIPPED);
+
+        // assume that order belongs to customer and status is processing
+        given(orderRepository.findByOrderNumberAndCustomerEmail(orderNumber, email))
+                .willReturn(Optional.of(order));
+
+        // WHEN
+        assertThatThrownBy(() -> orderService.cancelCustomerOrder(orderNumber, email))
+                .isInstanceOf(OrderException.class)
+                        .hasMessage("Order cannot be cancelled. Is is in transit or has been delivered.");
+
+        // THEN
+        then(orderRepository).should(never()).save(any());
+    }
+
+    @Test
+    void cancelCustomerOrder_whenOrderDoesNotExistOrIsNotFromGivenCustomer_throwOrderException() {
+        // GIVEN
+        long orderNumber = 1L;
+        String email = "john.last@gmail.com";
+
+
+        // assume that order belongs to customer and status is processing
+        given(orderRepository.findByOrderNumberAndCustomerEmail(orderNumber, email))
+                .willReturn(Optional.empty());
+
+        // WHEN
+        assertThatThrownBy(() -> orderService.cancelCustomerOrder(orderNumber, email))
+                .isInstanceOf(OrderException.class)
+                .hasMessage("Either order does not exist or does not belong to given customer");
+
+        // THEN
+        then(orderRepository).should(never()).save(any());
+    }
+
 
 
 }

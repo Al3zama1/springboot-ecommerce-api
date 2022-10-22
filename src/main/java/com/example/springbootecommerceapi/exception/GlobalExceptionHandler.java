@@ -87,6 +87,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         );
     }
 
+    @ExceptionHandler(OrderException.class)
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public ResponseEntity<Object> handleOrderException(
+            OrderException exception,
+            WebRequest request
+    ) {
+        return buildErrorResponse(
+                exception,
+                exception.getMessage(),
+                HttpStatus.ACCEPTED,
+                request
+        );
+    }
+
 
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)

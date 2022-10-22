@@ -1,15 +1,18 @@
 package com.example.springbootecommerceapi.service;
 
 import com.example.springbootecommerceapi.entity.*;
+import com.example.springbootecommerceapi.exception.OrderException;
 import com.example.springbootecommerceapi.exception.ProductOutOfStockException;
 import com.example.springbootecommerceapi.exception.UserException;
 import com.example.springbootecommerceapi.model.OrderDTO;
+import com.example.springbootecommerceapi.model.OrderStatus;
 import com.example.springbootecommerceapi.model.OutOfStockItemDTO;
 import com.example.springbootecommerceapi.repository.OrderItemRepository;
 import com.example.springbootecommerceapi.repository.OrderRepository;
 import com.example.springbootecommerceapi.repository.ProductRepository;
 import com.example.springbootecommerceapi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -106,5 +109,21 @@ public class OrderService {
     public List<OrderItemEntity> getOrderItems(long orderNumber, String username) {
         List<OrderItemEntity> orderItems = orderItemRepository.getOrderItemsFromOrder(orderNumber, username);
         return orderItems;
+    }
+
+    public void cancelCustomerOrder(long orderNumber, String email) {
+        Optional<OrderEntity> order = orderRepository
+                .findByOrderNumberAndCustomerEmail(orderNumber, email);
+
+        if (order.isEmpty()) {
+            throw new OrderException("Either order does not exist or does not belong to given customer");
+        }
+
+        if (!order.get().getStatus().equals(OrderStatus.PROCESSING)) {
+            throw new OrderException("Order cannot be cancelled. Is is in transit or has been delivered.");
+        }
+
+        order.get().setStatus(OrderStatus.CANCELLED);
+        orderRepository.save(order.get());
     }
 }
