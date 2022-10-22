@@ -34,6 +34,15 @@ public class AuthenticationController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    @PostMapping("/register-employee")
+    public ResponseEntity<Void> registerEmployee(
+            @Valid @RequestBody UserEntity user,
+            @RequestParam String token
+    ) {
+        authenticationService.registerEmployee(user, token);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
     @GetMapping("/activate-account")
     public ResponseEntity<Void> activateAccount(@RequestParam String token) {
         authenticationService.activateAccount(token);

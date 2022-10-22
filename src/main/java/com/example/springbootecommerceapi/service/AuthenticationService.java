@@ -162,4 +162,7 @@ public class AuthenticationService {
         userRepository.save(user);
         passwordTokenRepository.delete(passwordToken.get());
     }
+
+    public void registerEmployee(UserEntity user, String token) {
+    }
 }

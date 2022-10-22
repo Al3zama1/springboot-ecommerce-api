@@ -128,7 +128,7 @@ class AdminServiceTest {
         String employeeEmail = "employee@gmail.com";
 
         String token = UUID.randomUUID().toString();
-        
+
 
         // assume admin email exists and is actually and admin
         given(userRepository.findByEmail(adminEmail)).willReturn(Optional.empty());

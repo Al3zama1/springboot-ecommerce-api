@@ -102,6 +102,97 @@ class AuthenticationControllerTest {
     }
 
     @Test
+    void registerEmployee_whenValidData_return201() throws Exception{
+        // GIVEN
+        UserEntity employee = new UserBuilder()
+                .firstName("John")
+                .lastName("Last")
+                .gender(Gender.MALE)
+                .phone("(323) 456-1234")
+                .email("john.last@gmail.com")
+                .password("12345678")
+                .street("5678 S 88Th St")
+                .city("Los Angeles")
+                .state("California")
+                .zipCode("90002")
+                .build();
+
+        String token = UUID.randomUUID().toString();
+
+        // WHEN
+        mockMvc.perform(post("/api/ecommerce/v1/authentication/register-employee")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(employee))
+                .param("token", token)
+                .accept(MediaType.APPLICATION_JSON)
+                .with(csrf())
+        ).andExpect(status().isCreated());
+
+        // THEN
+        then(authenticationService).should().registerEmployee(employee, token);
+    }
+
+    @Test
+    void registerEmployee_whenInvalidEmployeeData_return422() throws Exception{
+        // GIVEN
+        UserEntity employee = new UserBuilder()
+                .firstName("John")
+                .lastName("Last")
+                .gender(Gender.MALE)
+                .phone("(323) 456-1234")
+                .email("john.lastgmail.com")
+                .password("12345678")
+                .street("5678 S 88Th St")
+                .city("Los Angeles")
+                .state("California")
+                .zipCode("90002")
+                .build();
+
+        String token = UUID.randomUUID().toString();
+
+        // WHEN
+        mockMvc.perform(post("/api/ecommerce/v1/authentication/register-employee")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(employee))
+                .param("token", token)
+                .accept(MediaType.APPLICATION_JSON)
+                .with(csrf())
+        ).andExpect(status().isUnprocessableEntity());
+
+        // THEN
+        then(authenticationService).should(never()).registerEmployee(any(), anyString());
+    }
+
+    @Test
+    void registerEmployee_whenEmployeeRegistrationTokenIsNotProvided_return400() throws Exception{
+        // GIVEN
+        UserEntity employee = new UserBuilder()
+                .firstName("John")
+                .lastName("Last")
+                .gender(Gender.MALE)
+                .phone("(323) 456-1234")
+                .email("john.last@gmail.com")
+                .password("12345678")
+                .street("5678 S 88Th St")
+                .city("Los Angeles")
+                .state("California")
+                .zipCode("90002")
+                .build();
+
+
+        // WHEN
+        mockMvc.perform(post("/api/ecommerce/v1/authentication/register-employee")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(employee))
+                .accept(MediaType.APPLICATION_JSON)
+                .with(csrf())
+        ).andExpect(status().isBadRequest());
+
+        // THEN
+        then(authenticationService).should(never()).registerEmployee(any(), anyString());
+    }
+
+    @Test
     void activateAccount_whenTokenProvided_return200() throws Exception {
         // GIVEN
         String token = UUID.randomUUID().toString();
