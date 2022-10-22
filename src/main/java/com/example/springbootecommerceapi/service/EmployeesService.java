@@ -41,7 +41,7 @@ public class EmployeesService {
         }
 
         order.get().setStatus(OrderStatus.DELIVERED);
-        order.get().setDateShipped(LocalDateTime.now());
+        order.get().setDateDelivered(LocalDateTime.now());
 
         orderRepository.save(order.get());
     }
