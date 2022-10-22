@@ -49,6 +49,7 @@ public class SecurityConfiguration {
 //                .antMatchers(HttpMethod.PATCH, "/api/ecommerce/v1/products/{\\d+}").hasAnyRole("EMPLOYEE, ADMIN")
 //                .antMatchers(HttpMethod.DELETE, "/api/ecommerce/v1/products/**").hasAnyRole("EMPLOYEE, ADMIN")
                 .antMatchers("/api/ecommerce/v1/orders/**").hasRole("CUSTOMER")
+                .antMatchers("/api/ecommerce/v1/employees/**").hasAnyRole("EMPLOYEE", "ADMIN")
                 .anyRequest().authenticated()
                 .and()
                 .userDetailsService(jpaUserDetailsService)
