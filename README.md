@@ -4,6 +4,7 @@
 - [Project Description]() 
 - [Project Features]()
 - [Requirements Gathering]()
+- [ER Diagram]()
 - [Roles / Authorities]()
 
 ## Project Description
@@ -29,6 +30,8 @@ and password reset through HTML emails.
 - **Order:** Each customer purchase creates an order which can contain 1 or more products. The order must have a unique identifier, orderDate, shipped date, customer to whom the order belongs, and a status.
 - **OrderItem:**For each product in the customer order, a record is created. This record is linked to an order number and to a product. The record also contains the quantity for that specific product and the price of each item when the purchase was done.
 
+## ER Diagram
+![alt text](https://github.com/stay-fcsd/springboot-ecommerce-api/blob/main/assets/ER-diagram.png "ER diagram")
 
 ## Roles / Authorities
 - **Customer:** purchase products, cancel orders, and look at own purchase history.
