@@ -5,7 +5,7 @@
 - [Project Features](#project-features)
 - [Requirements Gathering](#requirements-gathering)
 - [ER Diagram](#er-diagram)
-- [Roles / Authorities](#roles-/-authorities)
+- [Roles And Authorities](#roles-and-authorities)
 
 # Project Description
 Simple e-commerce application that allows customers to buy products
@@ -33,7 +33,7 @@ and password reset through HTML emails.
 ## ER Diagram
 ![alt text](https://github.com/stay-fcsd/springboot-ecommerce-api/blob/main/assets/ER-diagram.png "ER diagram")
 
-## Roles / Authorities
+## Roles And Authorities
 - **Customer:** purchase products, cancel orders, and look at own purchase history.
 - **Employee:** add, remove, restock products, and see customer purchase history.
 - **Admin:** Same as employee, plus can add new employees.
