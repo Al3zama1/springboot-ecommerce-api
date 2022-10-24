@@ -1,13 +1,13 @@
 # Ecommerce API
 
 ### Table of Contents
-- [Project Description]() 
-- [Project Features]()
-- [Requirements Gathering]()
-- [ER Diagram]()
-- [Roles / Authorities]()
+- [Project Description](#project-description) 
+- [Project Features](#project-features)
+- [Requirements Gathering](#requirements-gathering)
+- [ER Diagram](#er-diagram)
+- [Roles / Authorities](#roles-/-authorities)
 
-## Project Description
+# Project Description
 Simple e-commerce application that allows customers to buy products
 after they have created an account. The API has support for features such as account activation
 and password reset through HTML emails.
@@ -28,7 +28,7 @@ and password reset through HTML emails.
 - **Customer:** Customers must be authenticated to execute purchases.Customers need to have a unique identifier, name, last name, phone, address, email, and password. 
   Customers can not cancel an order once it has been shipped or delivered. Only while it is processing.
 - **Order:** Each customer purchase creates an order which can contain 1 or more products. The order must have a unique identifier, orderDate, shipped date, customer to whom the order belongs, and a status.
-- **OrderItem:**For each product in the customer order, a record is created. This record is linked to an order number and to a product. The record also contains the quantity for that specific product and the price of each item when the purchase was done.
+- **OrderItem:** For each product in the customer order, a record is created. This record is linked to an order number and to a product. The record also contains the quantity for that specific product and the price of each item when the purchase was done.
 
 ## ER Diagram
 ![alt text](https://github.com/stay-fcsd/springboot-ecommerce-api/blob/main/assets/ER-diagram.png "ER diagram")
